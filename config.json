@@ -1,0 +1,6 @@
+{
+  "theme": "netmedic-dark",
+  "scan_timeout": 60,
+  "logging": true,
+  "ignored_adapters": []
+}

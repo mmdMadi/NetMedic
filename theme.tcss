@@ -1,0 +1,84 @@
+/* ==========================================================================
+   NetMedic theme — "netmedic-dark"
+   A professional dark theme tuned for long sessions in Windows Terminal.
+
+   Notes
+   -----
+   Textual's TCSS is a subset of CSS. It does NOT support custom
+   properties (``:root { --x: ... }``) and color alpha must be expressed
+   as 8-digit hex (``#RRGGBBAA``), not as percentages. Use the built-in
+   design tokens (``$primary``, ``$success``, ...) and the auto-derived
+   variants (``$primary-darken-2``, ...) instead.
+   ========================================================================== */
+
+App {
+    background: #0b1016;
+    color: #d6dde6;
+}
+
+/* ----- Header / Footer ------------------------------------------------- */
+Header {
+    background: #111822;
+    color: #8ab4ff;
+}
+
+Footer {
+    background: #111822;
+    color: #d6dde6;
+}
+
+/* ----- Main layout: table + details ------------------------------------ */
+#main {
+    height: 1fr;
+}
+
+/* ----- Inputs (search box) -------------------------------------------- */
+Input {
+    background: #0a0e13;
+    border: round #2b5fab;
+    color: #e5edf6;
+    padding: 0 1;
+}
+
+Input:focus {
+    border: round #7fb0ff;
+}
+
+/* ----- DataTable ------------------------------------------------------- */
+DataTable {
+    background: #0b1016;
+    color: #e5edf6;
+    border: round #223042;
+}
+
+/* ----- Scrollbars ----------------------------------------------------- */
+Scrollbar {
+    background: #161b22;
+}
+
+Scrollbar > .scrollbar--thumb {
+    background: #4e8df5;
+}
+
+/* ----- Static text helpers -------------------------------------------- */
+Static {
+    color: #d6dde6;
+}
+
+Button {
+    background: #17212d;
+    color: #e5edf6;
+    border: tall #2b3d54;
+}
+
+Button:hover {
+    background: #213247;
+}
+
+Button.-primary {
+    background: #214d86;
+}
+
+Button.-error {
+    background: #7b2431;
+}

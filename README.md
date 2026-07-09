@@ -1,9 +1,10 @@
 # NetMedic
 
-> A professional **Windows Network Adapter Manager** built as a Textual
+> A professional **Windows Network Diagnostics & Repair Toolkit** built as a Textual
 > TUI. NetMedic inspects every network adapter on the machine, detects
-> inactive / virtual / VPN / ghost adapters, and provides safe
-> maintenance tools — **without ever removing hardware automatically**.
+> inactive / virtual / VPN / ghost adapters, provides safe
+> maintenance tools, and displays a live dashboard with internet health
+> scoring — **without ever removing hardware automatically**.
 
 NetMedic is built to be:
 
@@ -20,8 +21,15 @@ NetMedic is built to be:
 ### Dashboard
 A live, at-a-glance summary of the host:
 
-- Administrator / elevation detection banner.
-- Total adapters, physical, virtual, VPN, ghost, and disabled counts.
+- **Internet Status** — real-time connectivity check (Connected / No Internet / No DNS)
+- **Local IP** — primary local IPv4 address
+- **Public IP** — public-facing IPv4 address
+- **Windows Version** — detected OS version
+- **Connected Adapter** — name of the active network adapter
+- **DNS Server** — primary DNS server address
+- **Health Score** — 0–100 score based on internet, DNS, gateway, adapter, packet loss, and MTU
+- Administrator / elevation detection banner
+- Total adapters, physical, virtual, VPN, ghost, and disabled counts
 
 ### Adapter Scanner
 Reads **all** network adapters via PowerShell `Get-NetAdapter -IncludeHidden`
@@ -90,7 +98,10 @@ docs/
 - **OS**: Windows 10 / 11 (PowerShell `Get-NetAdapter` is required).
 - **Python**: 3.12 or newer.
 - **Terminal**: Windows Terminal, CMD, or PowerShell.
-- **Dependency**: [`textual`](https://textual.textualize.io/) (latest).
+- **Dependencies**:
+  - [`textual`](https://textual.textualize.io/) — TUI framework
+  - [`psutil`](https://github.com/giampaolo/psutil) — system/network info
+  - [`requests`](https://requests.readthedocs.io/) — HTTP for public IP lookup
 - **Optional**: Administrator privileges — required only for the
   *Disable* maintenance action. Detection, scanning, and export work
   without elevation.
@@ -156,16 +167,17 @@ Use the keyboard shortcuts below to drive it.
 NetMedic/
 ├── app.py                  # Textual App entry point + keyboard actions
 ├── config.py               # Config dataclass + JSON load/save
-├── requirements.txt        # textual dependency
+├── requirements.txt        # textual, psutil, requests
 ├── README.md               # this file
 ├── theme.tcss              # NetMedic dark theme (TCSS)
 ├── config.json             # user-editable runtime configuration
 ├── ui/                     # Textual widgets and modal dialogs
 │   ├── __init__.py
-│   ├── dashboard.py        # System summary + admin banner
+│   ├── dashboard.py        # System summary + info cards + health score
 │   ├── adapter_table.py    # Searchable/filterable/selectable table
 │   ├── details.py          # Per-adapter details panel
 │   ├── status.py           # Status bar + spinner
+│   ├── actions_bar.py      # Quick-action toolbar
 │   └── dialogs.py          # Confirm / Filter / Export / Error dialogs
 ├── network/                # Network domain logic (UI-free)
 │   ├── __init__.py
@@ -174,7 +186,11 @@ NetMedic/
 │   ├── categorizer.py      # Pure categorization rules
 │   ├── scanner.py          # AdapterScanner + ScanResult/ScanStats
 │   ├── diagnostics.py      # IP / DNS / gateway enrichment
-│   └── export.py           # CSV / JSON / TXT exporter
+│   ├── export.py           # CSV / JSON / TXT exporter
+│   ├── internet.py         # Internet connectivity check
+│   ├── local_info.py       # Local IP, adapters, DNS (psutil-based)
+│   ├── public_info.py      # Public IP, ISP, geo lookup
+│   └── health.py           # Health score computation (0–100)
 ├── utils/                  # Cross-cutting helpers
 │   ├── __init__.py
 │   ├── admin.py            # Administrator / elevation detection

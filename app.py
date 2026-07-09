@@ -45,6 +45,15 @@ from config import Config  # noqa: E402
 from network.adapter import Adapter  # noqa: E402
 from network.diagnostics import Diagnostics  # noqa: E402
 from network.export import ExportFormat, Exporter  # noqa: E402
+from network.health import compute_health  # noqa: E402
+from network.internet import check_internet  # noqa: E402
+from network.local_info import (  # noqa: E402
+    get_default_gateway,
+    get_local_ip,
+    get_connected_adapter,
+    get_primary_dns,
+)
+from network.public_info import get_public_ipv4  # noqa: E402
 from network.scanner import AdapterScanner, ScanResult  # noqa: E402
 from ui.adapter_table import AdapterTable, FilterKey  # noqa: E402
 from ui.actions_bar import ActionsBar  # noqa: E402
@@ -94,7 +103,7 @@ class NetMedicApp(App):
 
     CSS_PATH = "theme.tcss"
     TITLE = "NetMedic"
-    SUB_TITLE = "Windows Network Adapter Manager"
+    SUB_TITLE = "Windows Network Diagnostics & Repair Toolkit"
 
     BINDINGS = [
         Binding("r", "scan", "Scan"),
@@ -147,6 +156,13 @@ class NetMedicApp(App):
         self.query_one(Dashboard).refresh_elevation()
         # Kick off the first scan automatically so the user sees data.
         self.action_scan()
+        # Fetch dashboard intelligence in parallel background workers.
+        self._fetch_internet_status()
+        self._fetch_local_ip()
+        self._fetch_public_ip()
+        self._fetch_connected_adapter()
+        self._fetch_dns()
+        self._fetch_health_score()
 
     def on_button_pressed(self, event) -> None:
         """Dispatch top-level toolbar button clicks to actions."""
@@ -315,6 +331,111 @@ class NetMedicApp(App):
             self.call_from_thread(self._show_error, "Scan failed", str(exc))
             return
         self.call_from_thread(self._apply_scan_result, result)
+
+    # ------------------------------------------------------------------ #
+    # Dashboard data workers
+    # ------------------------------------------------------------------ #
+    @work(thread=True)
+    def _fetch_internet_status(self) -> None:
+        """Check internet connectivity and update the dashboard card."""
+        try:
+            status = check_internet()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("Internet check failed: %s", exc)
+            from network.internet import InternetStatus
+            status = InternetStatus.CHECK_FAILED
+        self.call_from_thread(
+            self.query_one(Dashboard).update_internet_status, status
+        )
+        # Recompute health after internet check completes.
+        self._recompute_health()
+
+    @work(thread=True)
+    def _fetch_local_ip(self) -> None:
+        """Read the local IP and update the dashboard card."""
+        try:
+            ip = get_local_ip()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("Local IP fetch failed: %s", exc)
+            ip = "—"
+        self.call_from_thread(
+            self.query_one(Dashboard).update_local_ip, ip
+        )
+
+    @work(thread=True)
+    def _fetch_public_ip(self) -> None:
+        """Fetch the public IP and update the dashboard card."""
+        try:
+            ip = get_public_ipv4()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("Public IP fetch failed: %s", exc)
+            ip = "—"
+        self.call_from_thread(
+            self.query_one(Dashboard).update_public_ip, ip
+        )
+
+    @work(thread=True)
+    def _fetch_connected_adapter(self) -> None:
+        """Detect the connected adapter and update the dashboard card."""
+        try:
+            name = get_connected_adapter()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("Connected adapter fetch failed: %s", exc)
+            name = "—"
+        self.call_from_thread(
+            self.query_one(Dashboard).update_connected_adapter, name
+        )
+
+    @work(thread=True)
+    def _fetch_dns(self) -> None:
+        """Read the primary DNS server and update the dashboard card."""
+        try:
+            dns = get_primary_dns()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("DNS fetch failed: %s", exc)
+            dns = "—"
+        self.call_from_thread(
+            self.query_one(Dashboard).update_dns, dns
+        )
+
+    @work(thread=True)
+    def _fetch_health_score(self) -> None:
+        """Compute the health score and update the dashboard."""
+        self._recompute_health()
+
+    def _recompute_health(self) -> None:
+        """Recompute health score from the latest available signals.
+
+        Called after any individual check completes. Reads the current
+        dashboard card values to build the score. Runs on a background
+        thread.
+        """
+        try:
+            dashboard = self.query_one(Dashboard)
+
+            # Read current card values for the health computation.
+            from network.internet import InternetStatus
+            internet_status = InternetStatus.CHECK_FAILED
+            try:
+                status_text = dashboard._card_status._value
+                for member in InternetStatus:
+                    if member.value in status_text:
+                        internet_status = member
+                        break
+            except Exception:
+                pass
+
+            gateway = get_default_gateway()
+            adapter_connected = get_connected_adapter() != "—"
+
+            score = compute_health(
+                internet_status=internet_status,
+                gateway=gateway,
+                adapter_connected=adapter_connected,
+            )
+            self.call_from_thread(dashboard.update_health_score, score)
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("Health score computation failed: %s", exc)
 
     @work(thread=True)
     def _diagnostics_worker(self, adapter: Adapter) -> None:

@@ -1,6 +1,8 @@
-# NetMedic — Network Adapter Manager
+# NetMedic — Network Diagnostics & Repair Toolkit
 # Python 3.12+ on Windows. Textual requires Windows Terminal / CMD / PowerShell.
 #
 # Install with:  pip install -r requirements.txt
 
 textual>=0.86.0
+psutil>=5.9.0
+requests>=2.31.0

@@ -102,7 +102,7 @@ class HealthScoreWidget(Static):
 
     def render(self) -> str:  # type: ignore[override]
         if self._score is None:
-            return "[dim]Health Score[/]\n[—][/]"
+            return "[dim]Health Score[/]\n[dim]Calculating…[/]"
         s = self._score
         return (
             f"[b]{s.status_symbol} {s.score} / {s.max_score}[/]\n"

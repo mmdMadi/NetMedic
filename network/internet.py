@@ -9,8 +9,8 @@ Two-level check:
 
 1. **Quick check** — attempt a TCP connection to ``1.1.1.1:53`` (Cloudflare DNS).
    This verifies basic IP connectivity without DNS.
-2. **Full check** — HTTP GET to ``httpbin.org/ip``. This verifies DNS
-   resolution + HTTP connectivity.
+2. **Full check** — HTTPS GET to ``https://api.ipify.org``. This verifies DNS
+   resolution + HTTP(S) connectivity.
 
 The result is a simple enum that the dashboard can render immediately.
 """
@@ -60,8 +60,12 @@ def _tcp_probe(host: str = "1.1.1.1", port: int = 53, timeout: int = _TIMEOUT) -
         return False
 
 
-def _http_probe(url: str = "http://httpbin.org/ip", timeout: int = _TIMEOUT) -> bool:
-    """Return ``True`` if an HTTP GET to ``url`` returns 200."""
+def _http_probe(url: str = "https://api.ipify.org?format=json", timeout: int = _TIMEOUT) -> bool:
+    """Return ``True`` if an HTTPS GET to ``url`` returns 200.
+
+    Uses HTTPS by default to work behind corporate proxies that may
+    intercept plain HTTP traffic.
+    """
     try:
         resp = requests.get(url, timeout=timeout)
         return resp.status_code == 200

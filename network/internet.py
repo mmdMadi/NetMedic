@@ -13,11 +13,14 @@ Two-level check:
    resolution + HTTP(S) connectivity.
 
 The result is a simple enum that the dashboard can render immediately.
+Latency is measured during the HTTP probe.
 """
 
 from __future__ import annotations
 
 import socket
+import time
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
@@ -51,6 +54,26 @@ class InternetStatus(str, Enum):
         return cls.CHECK_FAILED
 
 
+@dataclass(frozen=True)
+class InternetCheckResult:
+    """Result of an internet connectivity check with latency."""
+
+    status: InternetStatus
+    latency_ms: Optional[float] = None
+
+    @property
+    def is_connected(self) -> bool:
+        return self.status == InternetStatus.CONNECTED
+
+    @property
+    def latency_display(self) -> str:
+        if self.latency_ms is None:
+            return "—"
+        if self.latency_ms < 1:
+            return "<1 ms"
+        return f"{self.latency_ms:.0f} ms"
+
+
 def _tcp_probe(host: str = "1.1.1.1", port: int = 53, timeout: int = _TIMEOUT) -> bool:
     """Return ``True`` if a TCP connection to ``host:port`` succeeds."""
     try:
@@ -60,17 +83,17 @@ def _tcp_probe(host: str = "1.1.1.1", port: int = 53, timeout: int = _TIMEOUT) -
         return False
 
 
-def _http_probe(url: str = "https://api.ipify.org?format=json", timeout: int = _TIMEOUT) -> bool:
-    """Return ``True`` if an HTTPS GET to ``url`` returns 200.
-
-    Uses HTTPS by default to work behind corporate proxies that may
-    intercept plain HTTP traffic.
-    """
+def _http_probe_latency(url: str = "https://api.ipify.org?format=json", timeout: int = _TIMEOUT) -> Optional[float]:
+    """HTTP GET to ``url`` and return latency in milliseconds, or None on failure."""
     try:
+        start = time.perf_counter()
         resp = requests.get(url, timeout=timeout)
-        return resp.status_code == 200
+        elapsed = (time.perf_counter() - start) * 1000
+        if resp.status_code == 200:
+            return elapsed
+        return None
     except (requests.RequestException, OSError):
-        return False
+        return None
 
 
 def check_internet() -> InternetStatus:
@@ -84,23 +107,33 @@ def check_internet() -> InternetStatus:
         - ``NO_INTERNET`` — TCP probe failed.
         - ``CHECK_FAILED`` — unexpected error during check.
     """
+    result = check_internet_with_latency()
+    return result.status
+
+
+def check_internet_with_latency() -> InternetCheckResult:
+    """Check internet connectivity and measure latency.
+
+    Returns an :class:`InternetCheckResult` with status and latency.
+    Latency is only measured when the connection is successful.
+    """
     try:
         tcp_ok = _tcp_probe()
         if not tcp_ok:
             _log.info("Internet check: NO_INTERNET (TCP probe failed)")
-            return InternetStatus.NO_INTERNET
+            return InternetCheckResult(status=InternetStatus.NO_INTERNET)
 
-        http_ok = _http_probe()
-        if http_ok:
-            _log.info("Internet check: CONNECTED")
-            return InternetStatus.CONNECTED
+        latency = _http_probe_latency()
+        if latency is not None:
+            _log.info("Internet check: CONNECTED (latency=%.1fms)", latency)
+            return InternetCheckResult(status=InternetStatus.CONNECTED, latency_ms=latency)
 
         _log.info("Internet check: NO_DNS (HTTP probe failed)")
-        return InternetStatus.NO_DNS
+        return InternetCheckResult(status=InternetStatus.NO_DNS)
 
     except Exception as exc:
         _log.warning("Internet check failed unexpectedly: %s", exc)
-        return InternetStatus.CHECK_FAILED
+        return InternetCheckResult(status=InternetStatus.CHECK_FAILED)
 
 
 def is_connected() -> bool:

@@ -16,7 +16,7 @@ from .categorizer import Categorizer
 from .scanner import AdapterScanner, ScanResult
 from .diagnostics import Diagnostics
 from .export import ExportFormat, Exporter
-from .internet import InternetStatus, check_internet, is_connected
+from .internet import InternetStatus, InternetCheckResult, check_internet, check_internet_with_latency, is_connected
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -24,6 +24,8 @@ from .local_info import (
     get_connected_adapter,
     get_hostname,
     get_primary_dns,
+    get_dns_provider,
+    get_dns_display,
     get_default_gateway,
     gather as gather_local_info,
 )
@@ -43,7 +45,9 @@ __all__ = [
     "ExportFormat",
     "Exporter",
     "InternetStatus",
+    "InternetCheckResult",
     "check_internet",
+    "check_internet_with_latency",
     "is_connected",
     "LocalNetworkInfo",
     "AdapterInfo",
@@ -51,6 +55,8 @@ __all__ = [
     "get_connected_adapter",
     "get_hostname",
     "get_primary_dns",
+    "get_dns_provider",
+    "get_dns_display",
     "get_default_gateway",
     "gather_local_info",
     "PublicNetworkInfo",

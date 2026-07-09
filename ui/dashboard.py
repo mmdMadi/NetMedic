@@ -3,9 +3,11 @@ Dashboard widget: the system summary panel.
 
 The dashboard renders:
 
-1. **Info cards** — quick-glance tiles showing Internet Status, Local IP,
-   Public IP, Windows Version, Connected Adapter, and Current DNS.
-2. **Health score** — a large circular-style score (0–100) with grade.
+1. **Info cards** — quick-glance tiles showing Internet Status (with
+   latency), Local IP, Public IP (with ISP/country), Windows Version,
+   Connected Adapter, and Current DNS (with provider name).
+2. **Health score** — a large score (0–100) with grade, color-coded
+   by severity, listing individual contributing checks.
 3. **Elevation banner** — admin/standard-user privilege indicator.
 4. **Adapter stats** — total, physical, virtual, VPN, ghost, disabled.
 
@@ -65,34 +67,38 @@ class InfoCard(Static):
         super().__init__()
         self._label = label
         self._value = "—"
+        self._sub: str = ""
         if css_class:
             self.add_class(css_class)
 
     def render(self) -> str:  # type: ignore[override]
+        if self._sub:
+            return f"[dim]{self._label}[/]\n[b]{self._value}[/]\n[dim]{self._sub}[/]"
         return f"[dim]{self._label}[/]\n[b]{self._value}[/]"
 
-    def set_value(self, value: str) -> None:
-        """Update the displayed value and trigger a refresh."""
+    def set_value(self, value: str, sub: str = "") -> None:
+        """Update the displayed value and optional subtitle."""
         self._value = value
+        self._sub = sub
         self.refresh()
 
 
 # --------------------------------------------------------------------- #
-# Health score widget — large score display
+# Health score widget — large score with color + check list
 # --------------------------------------------------------------------- #
 
 class HealthScoreWidget(Static):
-    """A prominent health score display with grade and status symbol."""
+    """A prominent health score display with grade, color, and check list."""
 
     DEFAULT_CSS = """
     HealthScoreWidget {
-        width: 18;
-        height: 6;
+        width: 28;
+        height: auto;
+        min-height: 8;
         padding: 0 1;
         border: round $accent;
         background: $surface;
-        text-align: center;
-        content-align: center middle;
+        text-align: left;
     }
     """
 
@@ -104,15 +110,29 @@ class HealthScoreWidget(Static):
         if self._score is None:
             return "[dim]Health Score[/]\n[dim]Calculating…[/]"
         s = self._score
-        return (
-            f"[b]{s.status_symbol} {s.score} / {s.max_score}[/]\n"
-            f"[dim]{s.grade}[/]"
-        )
+        color = _score_color(s.percentage)
+        lines = [
+            f"[b {color}]{s.status_symbol} {s.score} / {s.max_score}[/]",
+            f"[{color}]{s.grade}[/]",
+            "",
+        ]
+        for check in s.checks:
+            icon = "✔" if check.passed else "✘"
+            c = "green" if check.passed else "red"
+            detail = f" — {check.detail}" if check.detail else ""
+            lines.append(f"  [{c}]{icon}[/] {check.label}{detail}")
+        return "\n".join(lines)
 
-    def set_score(self, score: HealthScore) -> None:
-        """Update the health score and refresh."""
-        self._score = score
-        self.refresh()
+
+def _score_color(percentage: float) -> str:
+    """Return a Textual color name based on score percentage."""
+    if percentage >= 90:
+        return "green"
+    if percentage >= 70:
+        return "yellow"
+    if percentage >= 50:
+        return "orange"
+    return "red"
 
 
 # --------------------------------------------------------------------- #
@@ -271,26 +291,37 @@ class Dashboard(Static):
         self.elevation_class = "elevated" if info.is_admin else "limited"
         return info
 
-    def update_internet_status(self, status: InternetStatus) -> None:
-        """Update the Internet Status card."""
+    def update_internet_status(self, status: InternetStatus, latency_ms: Optional[float] = None) -> None:
+        """Update the Internet Status card with status and optional latency."""
         color = "green" if status == InternetStatus.CONNECTED else "red"
-        self._card_status.set_value(f"[{color}]{status.value}[/]")
+        value = f"[{color}]{status.value}[/]"
+        sub = ""
+        if latency_ms is not None and status == InternetStatus.CONNECTED:
+            if latency_ms < 1:
+                sub = "Latency: <1 ms"
+            else:
+                sub = f"Latency: {latency_ms:.0f} ms"
+        self._card_status.set_value(value, sub)
 
     def update_local_ip(self, ip: str) -> None:
         """Update the Local IP card."""
         self._card_local_ip.set_value(ip)
 
-    def update_public_ip(self, ip: str) -> None:
-        """Update the Public IP card."""
-        self._card_public_ip.set_value(ip)
+    def update_public_ip(self, ip: str,isp: str = "", country: str = "") -> None:
+        """Update the Public IP card with optional ISP and country."""
+        sub = ""
+        parts = [p for p in (isp, country) if p and p != "—"]
+        if parts:
+            sub = " · ".join(parts)
+        self._card_public_ip.set_value(ip, sub)
 
     def update_connected_adapter(self, name: str) -> None:
         """Update the Connected Adapter card."""
         self._card_adapter.set_value(name)
 
-    def update_dns(self, dns: str) -> None:
-        """Update the DNS Server card."""
-        self._card_dns.set_value(dns)
+    def update_dns(self, dns_display: str) -> None:
+        """Update the DNS Server card with provider-aware display."""
+        self._card_dns.set_value(dns_display)
 
     def update_health_score(self, score: HealthScore) -> None:
         """Update the health score display."""
@@ -334,7 +365,6 @@ class Dashboard(Static):
         """Populate the Windows version card from platform info."""
         try:
             version = platform.platform()
-            # Truncate to a clean label: "Windows-10-10.0.19041-SP0" → "Windows 10"
             parts = version.split("-")
             if len(parts) >= 2 and parts[0] == "Windows":
                 label = f"Windows {parts[1]}"

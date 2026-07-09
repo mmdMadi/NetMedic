@@ -143,6 +143,61 @@ def get_primary_dns() -> str:
     return "—"
 
 
+# --------------------------------------------------------------------- #
+# DNS provider recognition
+# --------------------------------------------------------------------- #
+
+#: Known public DNS providers mapped by their IP addresses.
+DNS_PROVIDERS: dict[str, str] = {
+    "1.1.1.1": "Cloudflare",
+    "1.0.0.1": "Cloudflare",
+    "8.8.8.8": "Google",
+    "8.8.4.4": "Google",
+    "9.9.9.9": "Quad9",
+    "149.112.112.112": "Quad9",
+    "208.67.222.222": "OpenDNS",
+    "208.67.220.220": "OpenDNS",
+    "185.228.168.9": "CleanBrowsing",
+    "185.228.169.9": "CleanBrowsing",
+    "76.76.19.19": "Alternate DNS",
+    "94.140.14.14": "AdGuard",
+    "94.140.15.15": "AdGuard",
+}
+
+
+def get_dns_provider(dns_ip: str) -> str:
+    """Return the provider name for a DNS IP, or the IP itself if unknown.
+
+    Examples
+    --------
+    >>> get_dns_provider("1.1.1.1")
+    'Cloudflare'
+    >>> get_dns_provider("8.8.8.8")
+    'Google'
+    >>> get_dns_provider("192.168.1.1")
+    '192.168.1.1'
+    """
+    clean = dns_ip.strip()
+    return DNS_PROVIDERS.get(clean, clean)
+
+
+def get_dns_display() -> str:
+    """Return a display string for the primary DNS: 'Provider (IP)' or just IP.
+
+    Examples
+    --------
+    >>> get_dns_display()  # when DNS is 1.1.1.1
+    'Cloudflare (1.1.1.1)'
+    """
+    dns = get_primary_dns()
+    if dns in {"—", ""}:
+        return dns
+    provider = get_dns_provider(dns)
+    if provider != dns:
+        return f"{provider} ({dns})"
+    return dns
+
+
 def get_default_gateway() -> str:
     """Return the default gateway IP address."""
     try:

@@ -46,14 +46,14 @@ from network.adapter import Adapter  # noqa: E402
 from network.diagnostics import Diagnostics  # noqa: E402
 from network.export import ExportFormat, Exporter  # noqa: E402
 from network.health import compute_health  # noqa: E402
-from network.internet import check_internet  # noqa: E402
+from network.internet import check_internet_with_latency  # noqa: E402
 from network.local_info import (  # noqa: E402
     get_default_gateway,
     get_local_ip,
     get_connected_adapter,
-    get_primary_dns,
+    get_dns_display,
 )
-from network.public_info import get_public_ipv4  # noqa: E402
+from network.public_info import get_public_ipv4, get_isp_info  # noqa: E402
 from network.scanner import AdapterScanner, ScanResult  # noqa: E402
 from ui.adapter_table import AdapterTable, FilterKey  # noqa: E402
 from ui.actions_bar import ActionsBar  # noqa: E402
@@ -339,13 +339,16 @@ class NetMedicApp(App):
     def _fetch_internet_status(self) -> None:
         """Check internet connectivity and update the dashboard card."""
         try:
-            status = check_internet()
+            result = check_internet_with_latency()
+            status = result.status
+            latency = result.latency_ms
         except Exception as exc:  # noqa: BLE001
             _log.warning("Internet check failed: %s", exc)
             from network.internet import InternetStatus
             status = InternetStatus.CHECK_FAILED
+            latency = None
         self.call_from_thread(
-            self.query_one(Dashboard).update_internet_status, status
+            self.query_one(Dashboard).update_internet_status, status, latency
         )
         # Recompute health after internet check completes.
         self._recompute_health()
@@ -364,14 +367,19 @@ class NetMedicApp(App):
 
     @work(thread=True)
     def _fetch_public_ip(self) -> None:
-        """Fetch the public IP and update the dashboard card."""
+        """Fetch the public IP and ISP info, update the dashboard card."""
         try:
             ip = get_public_ipv4()
+            isp_data = get_isp_info()
+            isp = isp_data.get("isp", "")
+            country = isp_data.get("country", "")
         except Exception as exc:  # noqa: BLE001
             _log.warning("Public IP fetch failed: %s", exc)
             ip = "—"
+            isp = ""
+            country = ""
         self.call_from_thread(
-            self.query_one(Dashboard).update_public_ip, ip
+            self.query_one(Dashboard).update_public_ip, ip, isp, country
         )
 
     @work(thread=True)
@@ -388,9 +396,9 @@ class NetMedicApp(App):
 
     @work(thread=True)
     def _fetch_dns(self) -> None:
-        """Read the primary DNS server and update the dashboard card."""
+        """Read the DNS server with provider name and update the dashboard card."""
         try:
-            dns = get_primary_dns()
+            dns = get_dns_display()
         except Exception as exc:  # noqa: BLE001
             _log.warning("DNS fetch failed: %s", exc)
             dns = "—"

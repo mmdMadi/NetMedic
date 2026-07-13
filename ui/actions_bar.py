@@ -43,6 +43,7 @@ class ActionsBar(Horizontal):
     def compose(self) -> ComposeResult:
         yield Static("Actions", id="hint")
         yield Button("Scan", id="scan", variant="primary")
+        yield Button("Diagnostics", id="diagnostics")
         yield Button("Filter", id="filter")
         yield Button("Export", id="export")
         yield Button("Ignore", id="ignore")

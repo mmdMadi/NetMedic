@@ -59,6 +59,7 @@ from ui.adapter_table import AdapterTable, FilterKey  # noqa: E402
 from ui.actions_bar import ActionsBar  # noqa: E402
 from ui.dashboard import Dashboard  # noqa: E402
 from ui.details import DetailsPanel  # noqa: E402
+from ui.diagnostics import DiagnosticsScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -79,6 +80,7 @@ _log = get_logger("app")
 #: ``README`` can reference the same source of truth.
 KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("R", "Scan adapters"),
+    ("T", "Internet Diagnostics"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -107,6 +109,7 @@ class NetMedicApp(App):
 
     BINDINGS = [
         Binding("r", "scan", "Scan"),
+        Binding("t", "diagnostics", "Diagnostics"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -172,6 +175,7 @@ class NetMedicApp(App):
             return
         mapping = {
             "scan": self.action_scan,
+            "diagnostics": self.action_diagnostics,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -189,6 +193,10 @@ class NetMedicApp(App):
         """Run an adapter scan in a background worker thread."""
         self._set_status(StatusState.SCANNING, "Scanning adapters…")
         self._scan_worker()
+
+    def action_diagnostics(self) -> None:
+        """Open the full-screen Internet Diagnostics overlay."""
+        self.push_screen(DiagnosticsScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

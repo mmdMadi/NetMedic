@@ -172,7 +172,15 @@ class PublicInfoScreen(ModalScreen[None]):
                 info = PublicNetworkInfo(error=str(exc))
             self.call_from_thread(self._show_info, info)
 
-        threading.Thread(target=_worker, daemon=True).start()
+        t = threading.Thread(target=_worker, daemon=True)
+        t.start()
+        # Timeout safety — show error after 15s
+        self.set_timer(15, self._timeout_check)
+
+    def _timeout_check(self) -> None:
+        """Show a timeout message if fetching is still in progress."""
+        if self._status.renderable == "Loading…":
+            self._status.update("[yellow]Request timed out — check your internet connection[/]")
 
     def _show_info(self, info: PublicNetworkInfo) -> None:
         """Render the fetched information."""

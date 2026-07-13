@@ -45,15 +45,17 @@ _log = get_logger(__name__)
 # --------------------------------------------------------------------- #
 
 #: Default download test size in megabytes.
-DEFAULT_DOWNLOAD_MB: int = 10
+DEFAULT_DOWNLOAD_MB: int = 5
 #: Default upload test size in megabytes.
-DEFAULT_UPLOAD_MB: int = 10
+DEFAULT_UPLOAD_MB: int = 5
 #: Per-request timeout (seconds).
 REQUEST_TIMEOUT: int = 30
 #: Number of ICMP pings for latency measurement.
-PING_COUNT: int = 10
+PING_COUNT: int = 5
 #: ICMP ping timeout (seconds).
 PING_TIMEOUT: int = 2
+#: Overall speed test timeout (seconds).
+OVERALL_TIMEOUT: int = 120
 
 #: Download test endpoint — a 10 MB file served by Cloudflare.
 #: Falls back to Tele2 if Cloudflare is unreachable.
@@ -266,17 +268,38 @@ def test_ping_jitter(
     count: int = PING_COUNT,
     timeout: int = PING_TIMEOUT,
 ) -> tuple[float, float]:
-    """Measure ping latency and jitter via ICMP.
+    """Measure ping latency and jitter via ICMP, with TCP fallback.
 
     Returns
     -------
     tuple[float, float]
         ``(average_ms, jitter_ms)``
     """
-    from network.diagnostics_internet import ping_host
+    try:
+        from network.diagnostics_internet import ping_host
+        result = ping_host(host, count=count, timeout=timeout)
+        if result.reachable:
+            return (result.avg_ms, result.jitter_ms)
+    except Exception:
+        pass
 
-    result = ping_host(host, count=count, timeout=timeout)
-    return (result.avg_ms, result.jitter_ms)
+    # TCP fallback — measure HTTP round-trip time
+    times: list[float] = []
+    for _ in range(min(count, 5)):
+        try:
+            start = time.perf_counter()
+            requests.get(f"https://{host}", timeout=timeout, allow_redirects=False)
+            elapsed = (time.perf_counter() - start) * 1000
+            times.append(elapsed)
+        except Exception:
+            pass
+
+    if not times:
+        return (0.0, 0.0)
+
+    avg = sum(times) / len(times)
+    jitter = max(times) - min(times) if len(times) > 1 else 0.0
+    return (round(avg, 1), round(jitter, 1))
 
 
 # --------------------------------------------------------------------- #
@@ -288,6 +311,7 @@ def run_speed_test(
     upload_mb: int = DEFAULT_UPLOAD_MB,
     cancel_event: Optional[threading.Event] = None,
     progress: Optional[ProgressCallback] = None,
+    timeout: int = OVERALL_TIMEOUT,
 ) -> SpeedTestResult:
     """Run a complete speed test: ping, download, upload.
 
@@ -312,12 +336,24 @@ def run_speed_test(
         download_mb, upload_mb,
     )
 
+    # --- Overall timeout ---
+    deadline = time.perf_counter() + timeout
+
+    def _check_deadline() -> bool:
+        """Return True if we've exceeded the overall timeout."""
+        if time.perf_counter() > deadline:
+            _log.warning("Speed test exceeded overall timeout of %ds", timeout)
+            return True
+        if cancel_event and cancel_event.is_set():
+            return True
+        return False
+
     # --- Ping / Jitter ---
     if progress:
         progress("ping", 0, 0)
     ping_ms, jitter_ms = test_ping_jitter()
 
-    if cancel_event and cancel_event.is_set():
+    if _check_deadline():
         return SpeedTestResult(
             ping_ms=ping_ms, jitter_ms=jitter_ms, cancelled=True,
         )
@@ -331,7 +367,7 @@ def run_speed_test(
         progress=progress,
     )
 
-    if cancel_event and cancel_event.is_set():
+    if _check_deadline():
         return SpeedTestResult(
             download_mbps=dl_speed,
             download_bytes=dl_bytes,
@@ -351,7 +387,7 @@ def run_speed_test(
         progress=progress,
     )
 
-    if cancel_event and cancel_event.is_set():
+    if _check_deadline():
         return SpeedTestResult(
             download_mbps=dl_speed,
             download_bytes=dl_bytes,

@@ -204,7 +204,16 @@ class HealthScoreScreen(ModalScreen[None]):
                 )
             self.call_from_thread(self._show_report, report)
 
-        threading.Thread(target=_worker, daemon=True).start()
+        t = threading.Thread(target=_worker, daemon=True)
+        t.start()
+        # Timeout safety — if thread hangs, show partial result after 30s
+        self.set_timer(30, self._timeout_check)
+
+    def _timeout_check(self) -> None:
+        """Show a timeout message if the health computation is still running."""
+        if self._refresh_btn.disabled:
+            self._refresh_btn.disabled = False
+            self._status.update("[yellow]Health check timed out — showing cached data[/]")
 
     def _show_report(self, report: HealthReport) -> None:
         """Render the health report."""

@@ -46,6 +46,7 @@ class ActionsBar(Horizontal):
         yield Button("Diagnostics", id="diagnostics")
         yield Button("Speed Test", id="speed-test")
         yield Button("DNS", id="dns-tools")
+        yield Button("Repair", id="repair", variant="warning")
         yield Button("Filter", id="filter")
         yield Button("Export", id="export")
         yield Button("Ignore", id="ignore")

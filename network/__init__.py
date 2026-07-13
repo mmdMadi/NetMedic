@@ -49,6 +49,7 @@ from .dns_tools import (
     register_dns,
     clear_resolver_cache,
 )
+from .repair import RepairStep, RepairResult, StepStatus, REPAIR_STEPS, run_repair, is_admin
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -113,6 +114,12 @@ __all__ = [
     "flush_dns_cache",
     "register_dns",
     "clear_resolver_cache",
+    "RepairStep",
+    "RepairResult",
+    "StepStatus",
+    "REPAIR_STEPS",
+    "run_repair",
+    "is_admin",
     "LocalNetworkInfo",
     "AdapterInfo",
     "get_local_ip",

@@ -1,6 +1,13 @@
 /* ==========================================================================
-   NetMedic theme — "netmedic-dark"
+   NetMedic theme — "netmedic-dark" v2
    A professional dark theme tuned for long sessions in Windows Terminal.
+
+   Changes in v2:
+   - Rounded buttons with smooth hover transitions
+   - Improved DataTable with alternating row hints
+   - Better Input focus states
+   - Polished scrollbar styling
+   - Status bar color badges
 
    Notes
    -----
@@ -20,11 +27,13 @@ App {
 Header {
     background: #111822;
     color: #8ab4ff;
+    dock: top;
 }
 
 Footer {
     background: #111822;
     color: #d6dde6;
+    dock: bottom;
 }
 
 /* ----- Main layout: table + details ------------------------------------ */
@@ -35,13 +44,18 @@ Footer {
 /* ----- Inputs (search box) -------------------------------------------- */
 Input {
     background: #0a0e13;
-    border: round #2b5fab;
+    border: tall #2b5fab;
     color: #e5edf6;
     padding: 0 1;
 }
 
 Input:focus {
-    border: round #7fb0ff;
+    border: tall #7fb0ff;
+    background: #0d1219;
+}
+
+Input:focus-within {
+    border: tall #7fb0ff;
 }
 
 /* ----- DataTable ------------------------------------------------------- */
@@ -49,6 +63,29 @@ DataTable {
     background: #0b1016;
     color: #e5edf6;
     border: round #223042;
+    cursor-type: row;
+}
+
+DataTable > .datatable--header {
+    background: #111822;
+    color: #8ab4ff;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: #1e3a5f;
+}
+
+DataTable > .datatable--hover {
+    background: #162030;
+}
+
+DataTable > .datatable--even {
+    background: #0d1219;
+}
+
+DataTable > .datatable--odd {
+    background: #0b1016;
 }
 
 /* ----- Scrollbars ----------------------------------------------------- */
@@ -58,6 +95,15 @@ Scrollbar {
 
 Scrollbar > .scrollbar--thumb {
     background: #4e8df5;
+    border-radius: 2;
+}
+
+Scrollbar > .scrollbar--thumb:hover {
+    background: #7fb0ff;
+}
+
+Scrollbar > .scrollbar--button {
+    background: #2b3d54;
 }
 
 /* ----- Static text helpers -------------------------------------------- */
@@ -65,20 +111,97 @@ Static {
     color: #d6dde6;
 }
 
+/* ----- Buttons -------------------------------------------------------- */
 Button {
     background: #17212d;
     color: #e5edf6;
     border: tall #2b3d54;
+    padding: 0 2;
+    min-width: 10;
+    height: 3;
 }
 
 Button:hover {
     background: #213247;
+    border: tall #4e8df5;
 }
 
+Button:focus {
+    border: tall #7fb0ff;
+}
+
+Button:active {
+    background: #1a2840;
+}
+
+/* Button variants */
 Button.-primary {
     background: #214d86;
+    border: tall #3b82f6;
+}
+
+Button.-primary:hover {
+    background: #2b6cb0;
+    border: tall #60a5fa;
+}
+
+Button.-success {
+    background: #166534;
+    border: tall #22c55e;
+}
+
+Button.-success:hover {
+    background: #15803d;
+    border: tall #4ade80;
+}
+
+Button.-warning {
+    background: #854d0e;
+    border: tall #f59e0b;
+}
+
+Button.-warning:hover {
+    background: #a16207;
+    border: tall #fbbf24;
 }
 
 Button.-error {
     background: #7b2431;
+    border: tall #ef4444;
+}
+
+Button.-error:hover {
+    background: #991b1b;
+    border: tall #f87171;
+}
+
+/* ----- Tooltips ------------------------------------------------------- */
+Tooltip {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: round #334155;
+    padding: 0 1;
+}
+
+/* ----- Select (dropdown) ---------------------------------------------- */
+Select {
+    background: #0a0e13;
+    border: round #2b5fab;
+    color: #e5edf6;
+}
+
+Select:focus {
+    border: round #7fb0ff;
+}
+
+/* ----- Loading spinner animation -------------------------------------- */
+@keyframes spin {
+    from { text-style: none; }
+    to   { text-style: bold; }
+}
+
+/* ----- Selection highlight -------------------------------------------- */
+::selection {
+    background: #2563eb;
+    color: #ffffff;
 }

@@ -47,19 +47,13 @@ class InfoCard(Static):
         width: 1fr;
         height: 4;
         padding: 0 1;
-        border: round $primary-darken-2;
-        background: $surface;
+        border: round #1e293b;
+        background: #0f172a;
         content-align: left top;
     }
-    InfoCard .card-label {
-        color: $text-muted;
-        text-style: italic;
-        height: 1;
-    }
-    InfoCard .card-value {
-        color: $text;
-        text-style: bold;
-        height: 2;
+    InfoCard:hover {
+        border: round #334155;
+        background: #1e293b;
     }
     """
 
@@ -96,9 +90,13 @@ class HealthScoreWidget(Static):
         height: auto;
         min-height: 8;
         padding: 0 1;
-        border: round $accent;
-        background: $surface;
+        border: round #0e7490;
+        background: #0f172a;
         text-align: left;
+    }
+    HealthScoreWidget:hover {
+        border: round #22d3ee;
+        background: #1e293b;
     }
     """
 
@@ -209,18 +207,21 @@ class Dashboard(Static):
     StatTile {
         width: 1fr;
         padding: 0 1;
-        border: round $primary-darken-2;
+        border: round #1e293b;
         text-align: center;
         height: 4;
         content-align: center middle;
-        background: $surface;
+        background: #0f172a;
     }
-    StatTile.tile-total    { border: round $accent; }
-    StatTile.tile-ghost    { border: round $warning; }
-    StatTile.tile-vpn      { border: round $secondary; }
-    StatTile.tile-physical { border: round $success; }
-    StatTile.tile-disabled { border: round $error; }
-    StatTile.tile-virtual  { border: round $primary; }
+    StatTile:hover {
+        background: #1e293b;
+    }
+    StatTile.tile-total    { border: round #0e7490; }
+    StatTile.tile-ghost    { border: round #92400e; }
+    StatTile.tile-vpn      { border: round #6d28d9; }
+    StatTile.tile-physical { border: round #166534; }
+    StatTile.tile-disabled { border: round #991b1b; }
+    StatTile.tile-virtual  { border: round #1e40af; }
     """
 
     can_focus = False

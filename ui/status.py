@@ -42,7 +42,7 @@ class ProgressBar(Static):
     ProgressBar {
         width: 16;
         height: 1;
-        color: $accent;
+        color: #60a5fa;
         padding: 0 1;
     }
     """
@@ -83,26 +83,28 @@ class StatusBar(Horizontal):
     StatusBar {
         height: 1;
         dock: bottom;
-        background: $boost;
-        color: $text;
+        background: #111822;
+        color: #d6dde6;
+        border-top: solid #1e293b;
     }
     StatusBar #state {
         width: 14;
         height: 1;
         padding: 0 1;
-        background: $primary;
-        color: $text;
+        background: #214d86;
+        color: #e5edf6;
         text-style: bold;
     }
-    StatusBar #state.scanning  { background: $accent; }
-    StatusBar #state.exporting { background: $secondary; }
-    StatusBar #state.working   { background: $accent; }
-    StatusBar #state.error     { background: $error; }
+    StatusBar #state.idle     { background: #214d86; }
+    StatusBar #state.scanning  { background: #0e7490; }
+    StatusBar #state.exporting { background: #7c3aed; }
+    StatusBar #state.working   { background: #0e7490; }
+    StatusBar #state.error     { background: #991b1b; }
     StatusBar #message {
         width: 1fr;
         height: 1;
         padding: 0 1;
-        color: $text;
+        color: #94a3b8;
     }
     """
 
@@ -161,6 +163,8 @@ class StatusBar(Horizontal):
         cls = value.lower()
         if cls in {"scanning", "exporting", "working", "error"}:
             state_label.add_class(cls)
+        else:
+            state_label.add_class("idle")
         state_label.update(value)
 
     # ------------------------------------------------------------------ #

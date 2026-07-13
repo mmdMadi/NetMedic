@@ -35,6 +35,7 @@ from .diagnostics_internet import (
     detect_gateway,
     measure_latency,
 )
+from .speed_test import SpeedTestResult, run_speed_test, test_download, test_upload, test_ping_jitter
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -83,6 +84,11 @@ __all__ = [
     "test_dns_resolution",
     "detect_gateway",
     "measure_latency",
+    "SpeedTestResult",
+    "run_speed_test",
+    "test_download",
+    "test_upload",
+    "test_ping_jitter",
     "LocalNetworkInfo",
     "AdapterInfo",
     "get_local_ip",

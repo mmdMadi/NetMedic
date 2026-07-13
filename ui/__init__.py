@@ -14,6 +14,7 @@ from .adapter_table import AdapterTable, FilterKey
 from .details import DetailsPanel
 from .status import StatusBar, ProgressBar
 from .diagnostics import DiagnosticsScreen
+from .speed_test import SpeedTestScreen
 from .dialogs import (
     ConfirmDialog,
     ConfirmResult,
@@ -33,6 +34,7 @@ __all__ = [
     "StatusBar",
     "ProgressBar",
     "DiagnosticsScreen",
+    "SpeedTestScreen",
     "ConfirmDialog",
     "ConfirmResult",
     "BulkRemoveConfirmDialog",

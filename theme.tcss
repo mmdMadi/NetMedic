@@ -216,7 +216,4 @@ LoadingIndicator {
 }
 
 /* ----- Selection highlight -------------------------------------------- */
-::selection {
-    background: #2563eb;
-    color: #ffffff;
-}
+/* Note: Textual handles selection styling internally via design tokens. */

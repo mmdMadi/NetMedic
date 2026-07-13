@@ -233,13 +233,28 @@ def set_dns_servers(
             success=False, message="Primary DNS server is required.",
         )
 
+    # Validate IP format (basic check)
+    import re
+    ip_pattern = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+    if not ip_pattern.match(primary.strip()):
+        return DnsOperationResult(
+            success=False, message=f"Invalid primary DNS IP: {primary}",
+        )
+    if secondary and not ip_pattern.match(secondary.strip()):
+        return DnsOperationResult(
+            success=False, message=f"Invalid secondary DNS IP: {secondary}",
+        )
+
     try:
         from network.powershell import run_ps
 
         safe_name = adapter_name.replace("'", "''")
-        servers = f"'{primary}'"
-        if secondary:
-            servers = f"'{primary}', '{secondary}'"
+        safe_primary = primary.strip().replace("'", "''")
+        safe_secondary = secondary.strip().replace("'", "''") if secondary else ""
+
+        servers = f"'{safe_primary}'"
+        if safe_secondary:
+            servers = f"'{safe_primary}', '{safe_secondary}'"
 
         script = (
             f"Set-DnsClientServerAddress -InterfaceAlias '{safe_name}' "
@@ -376,11 +391,11 @@ def register_dns() -> DnsOperationResult:
         return DnsOperationResult(success=False, message=f"Register failed: {exc}")
 
 
-def clear_resolver_cache() -> DnsOperationResult:
-    """Clear the Winsock catalog and TCP/IP stack (``netsh int ip reset``).
+def reset_tcpip_stack() -> DnsOperationResult:
+    """Reset the TCP/IP stack (``netsh int ip reset``).
 
-    This is a more aggressive reset that rebuilds the network stack.
-    **Requires administrator privileges.**
+    This is a destructive operation that rebuilds the TCP/IP configuration.
+    **Requires administrator privileges.** A system restart may be needed.
     """
     try:
         from network.powershell import run_ps

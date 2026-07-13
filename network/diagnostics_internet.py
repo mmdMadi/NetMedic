@@ -268,12 +268,14 @@ def ping_multi_host(
     """
     results: list[PingResult] = [PingResult(host=h, reachable=False) for h in hosts]
     errors: list[str] = []
+    lock = threading.Lock()
 
     def _worker(idx: int, host: str) -> None:
         results[idx] = ping_host(host, count=count, timeout=timeout)
         if not results[idx].reachable:
             err = results[idx].error or "unreachable"
-            errors.append(f"{host}: {err}")
+            with lock:
+                errors.append(f"{host}: {err}")
 
     threads = [
         threading.Thread(target=_worker, args=(i, h), daemon=True)
@@ -319,7 +321,7 @@ def measure_packet_loss(
 # Traceroute
 # --------------------------------------------------------------------- #
 
-def trace_route(host: str, max_hops: int = 30, timeout: int = 5) -> TracerouteResult:
+def trace_route(host: str, max_hops: int = 30, timeout: int = 3000) -> TracerouteResult:
     """Run ``tracert -d`` and parse hop-by-hop latency.
 
     Parameters

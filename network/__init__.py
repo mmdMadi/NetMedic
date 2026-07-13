@@ -47,7 +47,7 @@ from .dns_tools import (
     reset_dns_automatic,
     flush_dns_cache,
     register_dns,
-    clear_resolver_cache,
+    reset_tcpip_stack,
 )
 from .repair import RepairStep, RepairResult, StepStatus, REPAIR_STEPS, run_repair, is_admin
 from .adapter_manager import AdapterDetail, AdapterOperationResult, list_adapters, get_adapter_detail, enable_adapter, disable_adapter, restart_adapter
@@ -114,7 +114,7 @@ __all__ = [
     "reset_dns_automatic",
     "flush_dns_cache",
     "register_dns",
-    "clear_resolver_cache",
+    "reset_tcpip_stack",
     "RepairStep",
     "RepairResult",
     "StepStatus",

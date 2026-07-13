@@ -25,6 +25,7 @@ progress bar and status label during the test.
 
 from __future__ import annotations
 
+import os
 import random
 import statistics
 import threading
@@ -103,7 +104,7 @@ def _bytes_to_mbps(bytes_transferred: int, elapsed_seconds: float) -> float:
 
 def _generate_payload(size_mb: int) -> bytes:
     """Generate random bytes for upload testing."""
-    return bytes(random.getrandbits(8) for _ in range(size_mb * 1024 * 1024))
+    return os.urandom(size_mb * 1024 * 1024)
 
 
 # --------------------------------------------------------------------- #

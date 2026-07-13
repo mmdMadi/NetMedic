@@ -32,6 +32,9 @@ from network.diagnostics_internet import (
     trace_route,
 )
 from utils.helpers import safe_str
+from utils.logger import get_logger
+
+_log = get_logger(__name__)
 
 
 class DiagnosticsScreen(ModalScreen[None]):
@@ -160,13 +163,14 @@ class DiagnosticsScreen(ModalScreen[None]):
     # Diagnostic workers — each runs on a Textual worker thread
     # ------------------------------------------------------------------ #
     def _run_all(self) -> None:
-        self._run_ping()
-        self._run_multi_ping()
-        self._run_packet_loss()
-        self._run_traceroute()
-        self._run_mtu()
-        self._run_dns()
-        self._run_gateway()
+        """Launch each diagnostic as a separate worker thread."""
+        self.run_worker(self._run_ping, thread=True)
+        self.run_worker(self._run_multi_ping, thread=True)
+        self.run_worker(self._run_packet_loss, thread=True)
+        self.run_worker(self._run_traceroute, thread=True)
+        self.run_worker(self._run_mtu, thread=True)
+        self.run_worker(self._run_dns, thread=True)
+        self.run_worker(self._run_gateway, thread=True)
 
     def _run_ping(self) -> None:
         """Ping 8.8.8.8 with 4 packets."""
@@ -181,7 +185,7 @@ class DiagnosticsScreen(ModalScreen[None]):
         try:
             result = ping_multi_host(self.DEFAULT_PING_HOSTS, count=4, timeout=2)
         except Exception as exc:
-            result = MultiPingResult(results=[], error=str(exc))
+            result = MultiPingResult(results=[], errors=[str(exc)])
         self.call_from_thread(self._render_multi_ping, result)
 
     def _run_packet_loss(self) -> None:
@@ -213,7 +217,8 @@ class DiagnosticsScreen(ModalScreen[None]):
         try:
             result = test_dns_resolution()
         except Exception as exc:
-            result = DnsTestResult(results=[], error=str(exc))
+            _log.warning("DNS test failed: %s", exc)
+            result = DnsTestResult(results=[])
         self.call_from_thread(self._render_dns, result)
 
     def _run_gateway(self) -> None:

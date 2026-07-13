@@ -26,6 +26,7 @@ from network.dns_tools import (
     get_active_adapter_dns,
     register_dns,
     reset_dns_automatic,
+    reset_tcpip_stack,
     set_dns_servers,
 )
 
@@ -339,9 +340,9 @@ class DnsToolsScreen(ModalScreen[None]):
         threading.Thread(target=_worker, daemon=True).start()
 
     def _do_reset(self) -> None:
-        """Reset the network stack (requires admin)."""
+        """Reset the TCP/IP stack (requires admin)."""
         def _worker() -> None:
-            result = clear_resolver_cache()
+            result = reset_tcpip_stack()
             icon = "✔" if result.success else "✘"
             color = "green" if result.success else "red"
             self.call_from_thread(

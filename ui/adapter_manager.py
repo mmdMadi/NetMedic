@@ -305,6 +305,7 @@ class AdapterManagerScreen(ModalScreen[None]):
         # Update button states
         self._enable_btn.disabled = adapter.enabled
         self._disable_btn.disabled = not adapter.enabled
+        self._restart_btn.disabled = False
 
         self._status.update(f"Selected: {adapter.name}")
 
@@ -369,8 +370,15 @@ class AdapterManagerScreen(ModalScreen[None]):
         """Handle the result of an adapter operation."""
         if result.success:
             self._set_status(f"[green]✔ {result.message}[/]")
-            # Refresh the list
+            # Remember selection and refresh
+            selected_name = self._selected.name if self._selected else None
             self._load_adapters()
+            # Re-select the adapter if it still exists
+            if selected_name:
+                for adapter in self._adapters:
+                    if adapter.name == selected_name:
+                        self._select_adapter(adapter)
+                        break
         else:
             self._set_status(f"[red]✘ {result.message}[/]")
 

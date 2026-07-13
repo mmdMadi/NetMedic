@@ -50,6 +50,7 @@ class ActionsBar(Horizontal):
         yield Button("Adapters", id="adapter-mgr")
         yield Button("Public Info", id="public-info")
         yield Button("Report", id="report")
+        yield Button("Health", id="health")
         yield Button("Filter", id="filter")
         yield Button("Export", id="export")
         yield Button("Ignore", id="ignore")

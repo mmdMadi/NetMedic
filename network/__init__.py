@@ -52,6 +52,7 @@ from .dns_tools import (
 from .repair import RepairStep, RepairResult, StepStatus, REPAIR_STEPS, run_repair, is_admin
 from .adapter_manager import AdapterDetail, AdapterOperationResult, list_adapters, get_adapter_detail, enable_adapter, disable_adapter, restart_adapter
 from .report_generator import DiagnosticReport, SystemInfo, NetworkStatus, AdapterSummary, DiagnosticSnapshot, SpeedSnapshot, generate_report, render_text, render_html, save_report
+from .health_service import HealthReport, compute_health_report, gather_health_signals
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -139,6 +140,9 @@ __all__ = [
     "render_text",
     "render_html",
     "save_report",
+    "HealthReport",
+    "compute_health_report",
+    "gather_health_signals",
     "LocalNetworkInfo",
     "AdapterInfo",
     "get_local_ip",

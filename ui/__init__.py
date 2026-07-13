@@ -20,6 +20,7 @@ from .repair import RepairScreen
 from .adapter_manager import AdapterManagerScreen
 from .public_info import PublicInfoScreen
 from .report_generator import ReportGeneratorScreen
+from .health_score import HealthScoreScreen
 from .dialogs import (
     ConfirmDialog,
     ConfirmResult,
@@ -45,6 +46,7 @@ __all__ = [
     "AdapterManagerScreen",
     "PublicInfoScreen",
     "ReportGeneratorScreen",
+    "HealthScoreScreen",
     "ConfirmDialog",
     "ConfirmResult",
     "BulkRemoveConfirmDialog",

@@ -66,6 +66,7 @@ from ui.repair import RepairScreen  # noqa: E402
 from ui.adapter_manager import AdapterManagerScreen  # noqa: E402
 from ui.public_info import PublicInfoScreen  # noqa: E402
 from ui.report_generator import ReportGeneratorScreen  # noqa: E402
+from ui.health_score import HealthScoreScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -93,6 +94,7 @@ KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("A", "Adapter Manager"),
     ("P", "Public Network Info"),
     ("G", "Diagnostic Report"),
+    ("H", "Internet Health Score"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -128,6 +130,7 @@ class NetMedicApp(App):
         Binding("a", "adapter_manager", "Adapters"),
         Binding("p", "public_info", "Public Info"),
         Binding("g", "report", "Report"),
+        Binding("h", "health_score", "Health"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -200,6 +203,7 @@ class NetMedicApp(App):
             "adapter-mgr": self.action_adapter_manager,
             "public-info": self.action_public_info,
             "report": self.action_report,
+            "health": self.action_health_score,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -245,6 +249,10 @@ class NetMedicApp(App):
     def action_report(self) -> None:
         """Open the Diagnostic Report generator overlay."""
         self.push_screen(ReportGeneratorScreen())
+
+    def action_health_score(self) -> None:
+        """Open the Internet Health Score overlay."""
+        self.push_screen(HealthScoreScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

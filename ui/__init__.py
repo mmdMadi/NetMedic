@@ -18,6 +18,7 @@ from .speed_test import SpeedTestScreen
 from .dns_tools import DnsToolsScreen
 from .repair import RepairScreen
 from .adapter_manager import AdapterManagerScreen
+from .public_info import PublicInfoScreen
 from .dialogs import (
     ConfirmDialog,
     ConfirmResult,
@@ -41,6 +42,7 @@ __all__ = [
     "DnsToolsScreen",
     "RepairScreen",
     "AdapterManagerScreen",
+    "PublicInfoScreen",
     "ConfirmDialog",
     "ConfirmResult",
     "BulkRemoveConfirmDialog",

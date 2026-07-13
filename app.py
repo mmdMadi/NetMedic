@@ -64,6 +64,7 @@ from ui.speed_test import SpeedTestScreen  # noqa: E402
 from ui.dns_tools import DnsToolsScreen  # noqa: E402
 from ui.repair import RepairScreen  # noqa: E402
 from ui.adapter_manager import AdapterManagerScreen  # noqa: E402
+from ui.public_info import PublicInfoScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -89,6 +90,7 @@ KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("N", "DNS Tools"),
     ("U", "Network Repair"),
     ("A", "Adapter Manager"),
+    ("P", "Public Network Info"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -122,6 +124,7 @@ class NetMedicApp(App):
         Binding("n", "dns_tools", "DNS"),
         Binding("u", "repair", "Repair"),
         Binding("a", "adapter_manager", "Adapters"),
+        Binding("p", "public_info", "Public Info"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -192,6 +195,7 @@ class NetMedicApp(App):
             "dns-tools": self.action_dns_tools,
             "repair": self.action_repair,
             "adapter-mgr": self.action_adapter_manager,
+            "public-info": self.action_public_info,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -229,6 +233,10 @@ class NetMedicApp(App):
     def action_adapter_manager(self) -> None:
         """Open the Adapter Manager overlay."""
         self.push_screen(AdapterManagerScreen())
+
+    def action_public_info(self) -> None:
+        """Open the Public Network Information overlay."""
+        self.push_screen(PublicInfoScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

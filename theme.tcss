@@ -64,7 +64,6 @@ DataTable {
     background: #0b1016;
     color: #e5edf6;
     border: round #223042;
-    cursor-type: row;
 }
 
 DataTable > .datatable--header {
@@ -96,7 +95,6 @@ Scrollbar {
 
 Scrollbar > .scrollbar--thumb {
     background: #4e8df5;
-    border-radius: 2;
 }
 
 Scrollbar > .scrollbar--thumb:hover {

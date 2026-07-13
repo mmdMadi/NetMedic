@@ -19,6 +19,7 @@ from .dns_tools import DnsToolsScreen
 from .repair import RepairScreen
 from .adapter_manager import AdapterManagerScreen
 from .public_info import PublicInfoScreen
+from .report_generator import ReportGeneratorScreen
 from .dialogs import (
     ConfirmDialog,
     ConfirmResult,
@@ -43,6 +44,7 @@ __all__ = [
     "RepairScreen",
     "AdapterManagerScreen",
     "PublicInfoScreen",
+    "ReportGeneratorScreen",
     "ConfirmDialog",
     "ConfirmResult",
     "BulkRemoveConfirmDialog",

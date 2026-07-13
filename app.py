@@ -65,6 +65,7 @@ from ui.dns_tools import DnsToolsScreen  # noqa: E402
 from ui.repair import RepairScreen  # noqa: E402
 from ui.adapter_manager import AdapterManagerScreen  # noqa: E402
 from ui.public_info import PublicInfoScreen  # noqa: E402
+from ui.report_generator import ReportGeneratorScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -91,6 +92,7 @@ KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("U", "Network Repair"),
     ("A", "Adapter Manager"),
     ("P", "Public Network Info"),
+    ("G", "Diagnostic Report"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -125,6 +127,7 @@ class NetMedicApp(App):
         Binding("u", "repair", "Repair"),
         Binding("a", "adapter_manager", "Adapters"),
         Binding("p", "public_info", "Public Info"),
+        Binding("g", "report", "Report"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -196,6 +199,7 @@ class NetMedicApp(App):
             "repair": self.action_repair,
             "adapter-mgr": self.action_adapter_manager,
             "public-info": self.action_public_info,
+            "report": self.action_report,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -237,6 +241,10 @@ class NetMedicApp(App):
     def action_public_info(self) -> None:
         """Open the Public Network Information overlay."""
         self.push_screen(PublicInfoScreen())
+
+    def action_report(self) -> None:
+        """Open the Diagnostic Report generator overlay."""
+        self.push_screen(ReportGeneratorScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

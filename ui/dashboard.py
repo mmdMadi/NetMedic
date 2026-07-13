@@ -32,7 +32,7 @@ from network.health import HealthScore
 from network.internet import InternetStatus
 from network.scanner import ScanStats
 from utils.admin import ElevationInfo, get_elevation_info
-from utils.helpers import safe_str
+from utils.helpers import safe_str, score_color
 
 
 # --------------------------------------------------------------------- #
@@ -104,11 +104,16 @@ class HealthScoreWidget(Static):
         super().__init__()
         self._score: Optional[HealthScore] = None
 
+    def set_score(self, score: HealthScore) -> None:
+        """Update the displayed health score and refresh."""
+        self._score = score
+        self.refresh()
+
     def render(self) -> str:  # type: ignore[override]
         if self._score is None:
             return "[dim]Health Score[/]\n[dim]Calculating…[/]"
         s = self._score
-        color = _score_color(s.percentage)
+        color = score_color(s.percentage)
         lines = [
             f"[b {color}]{s.status_symbol} {s.score} / {s.max_score}[/]",
             f"[{color}]{s.grade}[/]",
@@ -120,17 +125,6 @@ class HealthScoreWidget(Static):
             detail = f" — {check.detail}" if check.detail else ""
             lines.append(f"  [{c}]{icon}[/] {check.label}{detail}")
         return "\n".join(lines)
-
-
-def _score_color(percentage: float) -> str:
-    """Return a Textual color name based on score percentage."""
-    if percentage >= 90:
-        return "green"
-    if percentage >= 70:
-        return "yellow"
-    if percentage >= 50:
-        return "orange"
-    return "red"
 
 
 # --------------------------------------------------------------------- #

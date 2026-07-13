@@ -1,6 +1,6 @@
 [project]
 name = "netmedic"
-version = "1.2.0"
+version = "1.3.0"
 description = "Windows Network Diagnostics & Repair Toolkit"
 requires-python = ">=3.12"
 license = {text = "MIT"}

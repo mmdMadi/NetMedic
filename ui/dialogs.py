@@ -421,20 +421,21 @@ class BulkRemoveConfirmDialog(ModalScreen[ConfirmResult]):
 
 
 # --------------------------------------------------------------------- #
-# Error dialog
+# Message dialog (formerly ErrorDialog — kept for backward compat)
 # --------------------------------------------------------------------- #
-class ErrorDialog(ModalScreen[None]):
-    """Friendly, non-blocking error display.
+class MessageDialog(ModalScreen[None]):
+    """Friendly, non-blocking message display.
 
     NetMedic never crashes on a PowerShell failure; instead it shows the
-    details here and lets the user dismiss with Esc / Enter.
+    details here and lets the user dismiss with Esc / Enter. Also used
+    for non-error informational messages (success, keyboard shortcuts).
     """
 
     DEFAULT_CSS = """
-    ErrorDialog {
+    MessageDialog {
         align: center middle;
     }
-    ErrorDialog > Vertical {
+    MessageDialog > Vertical {
         width: 70;
         height: auto;
         max-height: 24;
@@ -442,16 +443,16 @@ class ErrorDialog(ModalScreen[None]):
         border: thick $error;
         padding: 1 2;
     }
-    ErrorDialog #title {
+    MessageDialog #title {
         text-style: bold;
         color: $error;
         padding-bottom: 1;
     }
-    ErrorDialog #body {
+    MessageDialog #body {
         padding-bottom: 1;
         color: $text;
     }
-    ErrorDialog Button {
+    MessageDialog Button {
         width: 100%;
     }
     """
@@ -475,3 +476,7 @@ class ErrorDialog(ModalScreen[None]):
     def on_key(self, event: events.Key) -> None:
         """Any key dismisses the dialog."""
         self.dismiss(None)
+
+
+# Backward-compatible alias
+ErrorDialog = MessageDialog

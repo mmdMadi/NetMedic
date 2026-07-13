@@ -18,17 +18,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
 from network.health_service import HealthReport, compute_health_report
-
-
-def _score_color(percentage: float) -> str:
-    """Return a Textual color name based on score percentage."""
-    if percentage >= 90:
-        return "green"
-    if percentage >= 70:
-        return "yellow"
-    if percentage >= 50:
-        return "orange"
-    return "red"
+from utils.helpers import score_color
 
 
 class HealthScoreScreen(ModalScreen[None]):
@@ -223,7 +213,7 @@ class HealthScoreScreen(ModalScreen[None]):
 
         score = report.score
         pct = score.percentage
-        color = _score_color(pct)
+        color = score_color(pct)
 
         # Score display
         self._status.update(f"Health Score: {score.score}/{score.max_score} — {score.grade}")

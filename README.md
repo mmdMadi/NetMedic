@@ -6,7 +6,7 @@
 > maintenance tools, and displays a live dashboard with internet health
 > scoring — **without ever removing hardware automatically**.
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/mmdMadi/NetMedic)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/mmdMadi/NetMedic)
 [![Python](https://img.shields.io/badge/python-3.12+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/)
@@ -271,7 +271,7 @@ NetMedic/
 ├── theme.tcss              # NetMedic dark theme (TCSS)
 ├── netmedic.spec           # PyInstaller spec for building
 ├── build.py                # Build script for packaging
-├── __init__.py             # Package version (1.2.0)
+├── __init__.py             # Package version (1.3.0)
 │
 ├── ui/                     # Textual widgets and modal dialogs (13 screens)
 │   ├── dashboard.py        # System summary + info cards + health score

@@ -14,6 +14,7 @@ from utils.helpers import (
     format_mac,
     format_speed,
     safe_str,
+    score_color,
     truncate,
 )
 
@@ -132,3 +133,43 @@ class TestFirstNonBlank:
     def test_first_non_blank(self) -> None:
         """Should return the first non-blank value."""
         assert first_non_blank(["hello", "world"]) == "hello"
+
+
+class TestScoreColor:
+    """Tests for the score_color function."""
+
+    def test_excellent(self) -> None:
+        """Should return green for scores >= 90."""
+        assert score_color(90) == "green"
+        assert score_color(100) == "green"
+
+    def test_good(self) -> None:
+        """Should return yellow for scores >= 70."""
+        assert score_color(70) == "yellow"
+        assert score_color(89) == "yellow"
+
+    def test_fair(self) -> None:
+        """Should return orange for scores >= 50."""
+        assert score_color(50) == "orange"
+        assert score_color(69) == "orange"
+
+    def test_poor(self) -> None:
+        """Should return red for scores < 50."""
+        assert score_color(0) == "red"
+        assert score_color(49) == "red"
+
+    def test_boundary_89(self) -> None:
+        """Score 89 should be yellow (just below excellent)."""
+        assert score_color(89) == "yellow"
+
+    def test_boundary_90(self) -> None:
+        """Score 90 should be green (excellent threshold)."""
+        assert score_color(90) == "green"
+
+    def test_boundary_69(self) -> None:
+        """Score 69 should be orange (just below good)."""
+        assert score_color(69) == "orange"
+
+    def test_boundary_70(self) -> None:
+        """Score 70 should be yellow (good threshold)."""
+        assert score_color(70) == "yellow"

@@ -21,6 +21,7 @@ Report sections
 
 from __future__ import annotations
 
+import html
 import platform
 import socket
 from dataclasses import dataclass, field
@@ -429,10 +430,10 @@ def render_html(report: DiagnosticReport) -> str:
     if report.system:
         s = report.system
         html_parts.append('<div class="section"><h2>System Information</h2><table>')
-        html_parts.append(f'<tr><td>Hostname</td><td>{s.hostname}</td></tr>')
-        html_parts.append(f'<tr><td>Username</td><td>{s.username}</td></tr>')
-        html_parts.append(f'<tr><td>Windows</td><td>{s.windows_version}</td></tr>')
-        html_parts.append(f'<tr><td>Python</td><td>{s.python_version}</td></tr>')
+        html_parts.append(f'<tr><td>Hostname</td><td>{html.escape(s.hostname)}</td></tr>')
+        html_parts.append(f'<tr><td>Username</td><td>{html.escape(s.username)}</td></tr>')
+        html_parts.append(f'<tr><td>Windows</td><td>{html.escape(s.windows_version)}</td></tr>')
+        html_parts.append(f'<tr><td>Python</td><td>{html.escape(s.python_version)}</td></tr>')
         html_parts.append(f'<tr><td>CPU</td><td>{s.cpu_count} cores @ {s.cpu_freq_mhz:.0f} MHz</td></tr>')
         html_parts.append(f'<tr><td>RAM</td><td>{s.ram_total_gb} GB total, {s.ram_available_gb} GB available</td></tr>')
         html_parts.append('</table></div>')
@@ -442,12 +443,12 @@ def render_html(report: DiagnosticReport) -> str:
         n = report.network
         status_class = "ok" if n.internet_status == "Connected" else "error"
         html_parts.append('<div class="section"><h2>Network Status</h2><table>')
-        html_parts.append(f'<tr><td>Internet</td><td class="{status_class}">{n.internet_status}</td></tr>')
-        html_parts.append(f'<tr><td>Local IP</td><td>{n.local_ip}</td></tr>')
-        html_parts.append(f'<tr><td>Public IP</td><td>{n.public_ip}</td></tr>')
-        html_parts.append(f'<tr><td>DNS Server</td><td>{n.dns_server}</td></tr>')
-        html_parts.append(f'<tr><td>Default Gateway</td><td>{n.default_gateway}</td></tr>')
-        html_parts.append(f'<tr><td>Connected</td><td>{n.connected_adapter}</td></tr>')
+        html_parts.append(f'<tr><td>Internet</td><td class="{status_class}">{html.escape(n.internet_status)}</td></tr>')
+        html_parts.append(f'<tr><td>Local IP</td><td>{html.escape(n.local_ip)}</td></tr>')
+        html_parts.append(f'<tr><td>Public IP</td><td>{html.escape(n.public_ip)}</td></tr>')
+        html_parts.append(f'<tr><td>DNS Server</td><td>{html.escape(n.dns_server)}</td></tr>')
+        html_parts.append(f'<tr><td>Default Gateway</td><td>{html.escape(n.default_gateway)}</td></tr>')
+        html_parts.append(f'<tr><td>Connected</td><td>{html.escape(n.connected_adapter)}</td></tr>')
         html_parts.append('</table></div>')
 
     # Adapters
@@ -482,14 +483,14 @@ def render_html(report: DiagnosticReport) -> str:
     if report.warnings:
         html_parts.append('<div class="section"><h2>Warnings</h2><ul>')
         for w in report.warnings:
-            html_parts.append(f'<li class="warning">⚠ {w}</li>')
+            html_parts.append(f'<li class="warning">⚠ {html.escape(w)}</li>')
         html_parts.append('</ul></div>')
 
     # Errors
     if report.errors:
         html_parts.append('<div class="section"><h2>Errors</h2><ul>')
         for e in report.errors:
-            html_parts.append(f'<li class="error">✘ {e}</li>')
+            html_parts.append(f'<li class="error">✘ {html.escape(e)}</li>')
         html_parts.append('</ul></div>')
 
     html_parts.append("</body></html>")

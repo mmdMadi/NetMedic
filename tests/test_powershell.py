@@ -84,7 +84,7 @@ class TestPowerShellRun:
             runner.run("throw 'test error'")
 
     def test_run_json(self) -> None:
-        """Should parse JSON output."""
+        """Should parse JSON output from a script that emits JSON."""
         runner = PowerShellRunner(default_timeout=10)
-        result = runner.run_json('[1, 2, 3]')
+        result = runner.run_json('@(1, 2, 3) | ConvertTo-Json')
         assert result == [1, 2, 3]

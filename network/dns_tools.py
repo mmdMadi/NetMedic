@@ -402,14 +402,14 @@ def reset_tcpip_stack() -> DnsOperationResult:
 
         result = run_ps("netsh int ip reset", timeout=30)
         output = result.stdout.strip()
-        _log.info("Clear resolver cache: %s", output)
+        _log.info("Reset TCP/IP stack: %s", output)
         return DnsOperationResult(
             success=True,
             message="Network stack reset. A restart may be required.",
         )
 
     except Exception as exc:
-        _log.error("Clear resolver cache failed: %s", exc)
+        _log.error("Reset TCP/IP stack failed: %s", exc)
         return DnsOperationResult(
             success=False, message=f"Reset failed: {exc}",
         )

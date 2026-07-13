@@ -33,6 +33,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable, Optional
 
+from utils.admin import is_admin
 from utils.logger import get_logger
 
 _log = get_logger(__name__)
@@ -292,12 +293,3 @@ def run_repair(
     )
 
     return result
-
-
-def is_admin() -> bool:
-    """Return True if the current process has administrator privileges."""
-    try:
-        import ctypes
-        return ctypes.windll.shell32.IsUserAnAdmin() != 0  # type: ignore[attr-defined]
-    except Exception:
-        return False

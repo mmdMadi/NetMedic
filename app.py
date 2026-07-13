@@ -72,7 +72,7 @@ from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
     BulkRemoveConfirmDialog,
-    ErrorDialog,
+    MessageDialog,
     ExportDialog,
     FilterDialog,
     RemoveConfirmDialog,
@@ -305,7 +305,7 @@ class NetMedicApp(App):
         info = get_elevation_info()
         if not info.is_admin:
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Administrator required",
                     body=(
                         "Disabling an adapter needs elevation.\n"
@@ -346,7 +346,7 @@ class NetMedicApp(App):
         info = get_elevation_info()
         if not info.is_admin:
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Administrator required",
                     body=(
                         "Removing an adapter needs elevation.\n"
@@ -384,7 +384,7 @@ class NetMedicApp(App):
         lines = ["NetMedic — Keyboard Shortcuts", "=" * 40, ""]
         for key, desc in KEYBOARD_SHORTCUTS:
             lines.append(f"  {key:<10} {desc}")
-        self.push_screen(ErrorDialog(title="Keyboard Shortcuts", body="\n".join(lines)))
+        self.push_screen(MessageDialog(title="Keyboard Shortcuts", body="\n".join(lines)))
 
     # ------------------------------------------------------------------ #
     # Background work
@@ -791,7 +791,7 @@ class NetMedicApp(App):
                 f"Removed {adapter_name}.",
             )
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Adapter Removed",
                     body=(
                         f"Successfully removed adapter:\n"
@@ -805,7 +805,7 @@ class NetMedicApp(App):
         else:
             self._set_status(StatusState.ERROR, "Remove failed.")
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Remove Failed",
                     body=(
                         f"Failed to remove adapter:\n"
@@ -865,7 +865,7 @@ class NetMedicApp(App):
                 f"Removed {len(removed)}/{len(results)} adapters.",
             )
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Bulk Remove Result",
                     body="\n".join(lines),
                 )
@@ -876,7 +876,7 @@ class NetMedicApp(App):
                 f"Removed {len(removed)} adapter(s).",
             )
             self.push_screen(
-                ErrorDialog(
+                MessageDialog(
                     title="Adapters Removed",
                     body=(
                         "Successfully removed:\n\n"
@@ -900,7 +900,7 @@ class NetMedicApp(App):
         """Log and present a friendly error dialog."""
         _log.error("%s: %s", title, body)
         self._set_status(StatusState.ERROR, title)
-        self.push_screen(ErrorDialog(title=title, body=body))
+        self.push_screen(MessageDialog(title=title, body=body))
 
     def _has_data(self) -> bool:
         """Return ``True`` when there is at least one scanned adapter."""

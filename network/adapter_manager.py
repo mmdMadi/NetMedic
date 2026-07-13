@@ -66,26 +66,40 @@ class AdapterOperationResult:
 def list_adapters() -> list[AdapterDetail]:
     """Return all network adapters with their current configuration.
 
-    Uses ``Get-NetAdapter`` combined with ``Get-NetIPAddress`` and
-    ``Get-DnsClientServerAddress`` for full details.
+    Uses ``Get-NetAdapter`` combined with bulk ``Get-NetIPAddress``,
+    ``Get-NetRoute``, ``Get-DnsClientServerAddress``, and MTU queries
+    to minimize PowerShell round-trips.
     """
     try:
         from network.powershell import run_ps
 
-        script = (
+        # 1. Get all adapters in one call
+        adapter_script = (
             "Get-NetAdapter -IncludeHidden | "
             "Select-Object Name,InterfaceDescription,Status,MacAddress,"
             "LinkSpeed,DriverVersion,DriverProvider,ifIndex,"
             "AdminStatus,PhysicalAdapter,Virtual | "
             "ConvertTo-Json -Depth 3 -Compress"
         )
-        result = run_ps(script, timeout=30)
+        result = run_ps(adapter_script, timeout=30)
         if not result.stdout:
             return []
 
         raw_adapters = json.loads(result.stdout)
         if isinstance(raw_adapters, dict):
             raw_adapters = [raw_adapters]
+
+        # 2. Bulk fetch IP addresses for ALL adapters in one call
+        ip_map = _bulk_fetch_ip_addresses()
+
+        # 3. Bulk fetch default gateways for ALL adapters in one call
+        gw_map = _bulk_fetch_gateways()
+
+        # 4. Bulk fetch DNS servers for ALL adapters in one call
+        dns_map = _bulk_fetch_dns()
+
+        # 5. Bulk fetch MTU for ALL adapters in one call
+        mtu_map = _bulk_fetch_mtu()
 
         adapters: list[AdapterDetail] = []
         for raw in raw_adapters:
@@ -95,18 +109,18 @@ def list_adapters() -> list[AdapterDetail]:
 
             status = str(raw.get("Status") or "").strip()
             admin_status = str(raw.get("AdminStatus") or "").strip().lower()
-            # AdminStatus can be int (1=Up, 2=Down) or string
             enabled = status.lower() == "up" or admin_status in {"up", "1"}
 
-            # Determine category
             category = "Unknown"
             if raw.get("PhysicalAdapter"):
                 category = "Physical"
             elif raw.get("Virtual"):
                 category = "Virtual"
 
-            # Get IP info for this adapter
-            ipv4, ipv6, gateways, dns, mtu = _get_adapter_ip_info(name)
+            ipv4, ipv6 = ip_map.get(name, ([], []))
+            gateways = gw_map.get(name, [])
+            dns = dns_map.get(name, [])
+            mtu = mtu_map.get(name, 0)
 
             adapters.append(AdapterDetail(
                 name=name,
@@ -134,79 +148,156 @@ def list_adapters() -> list[AdapterDetail]:
         return []
 
 
-def _get_adapter_ip_info(
-    adapter_name: str,
-) -> tuple[list[str], list[str], list[str], list[str], int]:
-    """Get IP, gateway, DNS, and MTU for a specific adapter.
+def _bulk_fetch_ip_addresses() -> dict[str, tuple[list[str], list[str]]]:
+    """Fetch IPv4 and IPv6 addresses for all adapters in one PS call.
 
-    Returns ``(ipv4, ipv6, gateways, dns, mtu)``.
+    Returns ``{adapter_name: (ipv4_list, ipv6_list)}``.
     """
-    ipv4: list[str] = []
-    ipv6: list[str] = []
-    gateways: list[str] = []
-    dns: list[str] = []
-    mtu = 0
-
     try:
         from network.powershell import run_ps
 
-        safe_name = adapter_name.replace("'", "''")
-
-        # IP addresses
-        ip_script = (
-            f"Get-NetIPAddress -InterfaceAlias '{safe_name}' "
-            "-AddressFamily IPv4,IPv6 -ErrorAction SilentlyContinue | "
-            "Select-Object IPAddress,AddressFamily | "
+        script = (
+            "Get-NetIPAddress -AddressFamily IPv4,IPv6 "
+            "-ErrorAction SilentlyContinue | "
+            "Select-Object InterfaceAlias,IPAddress,AddressFamily | "
             "ConvertTo-Json -Depth 2 -Compress"
         )
-        ip_result = run_ps(ip_script, timeout=10)
-        if ip_result.stdout:
-            ip_data = json.loads(ip_result.stdout)
-            if isinstance(ip_data, dict):
-                ip_data = [ip_data]
-            for entry in ip_data:
-                addr = entry.get("IPAddress", "")
-                fam = entry.get("AddressFamily", "")
-                if "IPv4" in str(fam):
-                    ipv4.append(addr)
-                elif "IPv6" in str(fam):
-                    ipv6.append(addr)
+        result = run_ps(script, timeout=15)
+        if not result.stdout:
+            return {}
 
-        # Default gateway
-        gw_script = (
-            f"Get-NetRoute -InterfaceAlias '{safe_name}' "
-            "-DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue | "
-            "Select-Object -ExpandProperty NextHop"
-        )
-        gw_result = run_ps(gw_script, timeout=10)
-        if gw_result.stdout:
-            gateways = [g.strip() for g in gw_result.stdout.splitlines() if g.strip()]
+        data = json.loads(result.stdout)
+        if isinstance(data, dict):
+            data = [data]
 
-        # DNS servers
-        dns_script = (
-            f"Get-DnsClientServerAddress -InterfaceAlias '{safe_name}' "
-            "-AddressFamily IPv4 -ErrorAction SilentlyContinue | "
-            "Select-Object -ExpandProperty ServerAddresses"
-        )
-        dns_result = run_ps(dns_script, timeout=10)
-        if dns_result.stdout:
-            dns = [d.strip() for d in dns_result.stdout.splitlines() if d.strip()]
-
-        # MTU
-        mtu_script = (
-            f"(Get-NetAdapter -Name '{safe_name}' -ErrorAction SilentlyContinue).Mtu"
-        )
-        mtu_result = run_ps(mtu_script, timeout=10)
-        if mtu_result.stdout:
-            try:
-                mtu = int(mtu_result.stdout.strip())
-            except ValueError:
-                pass
+        ip_map: dict[str, tuple[list[str], list[str]]] = {}
+        for entry in data:
+            iface = entry.get("InterfaceAlias", "")
+            addr = entry.get("IPAddress", "")
+            fam = str(entry.get("AddressFamily", ""))
+            if not iface or not addr:
+                continue
+            ipv4, ipv6 = ip_map.get(iface, ([], []))
+            if "IPv4" in fam:
+                ipv4.append(addr)
+            elif "IPv6" in fam:
+                ipv6.append(addr)
+            ip_map[iface] = (ipv4, ipv6)
+        return ip_map
 
     except Exception as exc:
-        _log.debug("IP info fetch failed for %s: %s", adapter_name, exc)
+        _log.debug("Bulk IP fetch failed: %s", exc)
+        return {}
 
-    return ipv4, ipv6, gateways, dns, mtu
+
+def _bulk_fetch_gateways() -> dict[str, list[str]]:
+    """Fetch default gateways for all adapters in one PS call.
+
+    Returns ``{adapter_name: [gateway_ip, ...]}``.
+    """
+    try:
+        from network.powershell import run_ps
+
+        script = (
+            "Get-NetRoute -DestinationPrefix '0.0.0.0/0' "
+            "-ErrorAction SilentlyContinue | "
+            "Select-Object InterfaceAlias,NextHop | "
+            "ConvertTo-Json -Depth 2 -Compress"
+        )
+        result = run_ps(script, timeout=15)
+        if not result.stdout:
+            return {}
+
+        data = json.loads(result.stdout)
+        if isinstance(data, dict):
+            data = [data]
+
+        gw_map: dict[str, list[str]] = {}
+        for entry in data:
+            iface = entry.get("InterfaceAlias", "")
+            hop = entry.get("NextHop", "")
+            if iface and hop:
+                gw_map.setdefault(iface, []).append(hop)
+        return gw_map
+
+    except Exception as exc:
+        _log.debug("Bulk gateway fetch failed: %s", exc)
+        return {}
+
+
+def _bulk_fetch_dns() -> dict[str, list[str]]:
+    """Fetch DNS servers for all adapters in one PS call.
+
+    Returns ``{adapter_name: [dns_ip, ...]}``.
+    """
+    try:
+        from network.powershell import run_ps
+
+        script = (
+            "Get-DnsClientServerAddress -AddressFamily IPv4 "
+            "-ErrorAction SilentlyContinue | "
+            "Where-Object { $_.ServerAddresses } | "
+            "Select-Object InterfaceAlias,ServerAddresses | "
+            "ConvertTo-Json -Depth 3"
+        )
+        result = run_ps(script, timeout=15)
+        if not result.stdout:
+            return {}
+
+        data = json.loads(result.stdout)
+        if isinstance(data, dict):
+            data = [data]
+
+        dns_map: dict[str, list[str]] = {}
+        for entry in data:
+            iface = entry.get("InterfaceAlias", "")
+            servers = entry.get("ServerAddresses", [])
+            if isinstance(servers, str):
+                servers = [servers]
+            if iface and servers:
+                dns_map[iface] = list(servers)
+        return dns_map
+
+    except Exception as exc:
+        _log.debug("Bulk DNS fetch failed: %s", exc)
+        return {}
+
+
+def _bulk_fetch_mtu() -> dict[str, int]:
+    """Fetch MTU for all adapters in one PS call.
+
+    Returns ``{adapter_name: mtu}``.
+    """
+    try:
+        from network.powershell import run_ps
+
+        script = (
+            "Get-NetAdapter -IncludeHidden -ErrorAction SilentlyContinue | "
+            "Select-Object Name,Mtu | "
+            "ConvertTo-Json -Depth 2 -Compress"
+        )
+        result = run_ps(script, timeout=15)
+        if not result.stdout:
+            return {}
+
+        data = json.loads(result.stdout)
+        if isinstance(data, dict):
+            data = [data]
+
+        mtu_map: dict[str, int] = {}
+        for entry in data:
+            name = entry.get("Name", "")
+            mtu_val = entry.get("Mtu", 0)
+            if name:
+                try:
+                    mtu_map[name] = int(mtu_val)
+                except (TypeError, ValueError):
+                    pass
+        return mtu_map
+
+    except Exception as exc:
+        _log.debug("Bulk MTU fetch failed: %s", exc)
+        return {}
 
 
 # --------------------------------------------------------------------- #

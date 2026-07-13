@@ -137,3 +137,17 @@ def first_non_blank(items: Iterable[Any], default: str = "") -> str:
 def now_iso() -> str:
     """Return the current UTC time as an ISO-8601 string."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def score_color(percentage: float) -> str:
+    """Return a Textual color name based on a 0–100 health score percentage.
+
+    Colors: green (≥90), yellow (≥70), orange (≥50), red (<50).
+    """
+    if percentage >= 90:
+        return "green"
+    if percentage >= 70:
+        return "yellow"
+    if percentage >= 50:
+        return "orange"
+    return "red"

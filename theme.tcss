@@ -194,12 +194,6 @@ Select:focus {
     border: round #7fb0ff;
 }
 
-/* ----- Loading spinner animation -------------------------------------- */
-@keyframes spin {
-    from { text-style: none; }
-    to   { text-style: bold; }
-}
-
 /* ----- Selection highlight -------------------------------------------- */
 ::selection {
     background: #2563eb;

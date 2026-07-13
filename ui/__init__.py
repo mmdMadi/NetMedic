@@ -15,6 +15,7 @@ from .details import DetailsPanel
 from .status import StatusBar, ProgressBar
 from .diagnostics import DiagnosticsScreen
 from .speed_test import SpeedTestScreen
+from .dns_tools import DnsToolsScreen
 from .dialogs import (
     ConfirmDialog,
     ConfirmResult,
@@ -35,6 +36,7 @@ __all__ = [
     "ProgressBar",
     "DiagnosticsScreen",
     "SpeedTestScreen",
+    "DnsToolsScreen",
     "ConfirmDialog",
     "ConfirmResult",
     "BulkRemoveConfirmDialog",

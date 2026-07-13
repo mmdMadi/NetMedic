@@ -61,6 +61,7 @@ from ui.dashboard import Dashboard  # noqa: E402
 from ui.details import DetailsPanel  # noqa: E402
 from ui.diagnostics import DiagnosticsScreen  # noqa: E402
 from ui.speed_test import SpeedTestScreen  # noqa: E402
+from ui.dns_tools import DnsToolsScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -83,6 +84,7 @@ KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("R", "Scan adapters"),
     ("T", "Internet Diagnostics"),
     ("S", "Internet Speed Test"),
+    ("N", "DNS Tools"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -113,6 +115,7 @@ class NetMedicApp(App):
         Binding("r", "scan", "Scan"),
         Binding("t", "diagnostics", "Diagnostics"),
         Binding("s", "speed_test", "Speed Test"),
+        Binding("n", "dns_tools", "DNS"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -180,6 +183,7 @@ class NetMedicApp(App):
             "scan": self.action_scan,
             "diagnostics": self.action_diagnostics,
             "speed-test": self.action_speed_test,
+            "dns-tools": self.action_dns_tools,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -205,6 +209,10 @@ class NetMedicApp(App):
     def action_speed_test(self) -> None:
         """Open the Internet Speed Test overlay."""
         self.push_screen(SpeedTestScreen())
+
+    def action_dns_tools(self) -> None:
+        """Open the DNS Tools overlay."""
+        self.push_screen(DnsToolsScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

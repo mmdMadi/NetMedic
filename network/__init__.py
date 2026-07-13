@@ -36,6 +36,19 @@ from .diagnostics_internet import (
     measure_latency,
 )
 from .speed_test import SpeedTestResult, run_speed_test, test_download, test_upload, test_ping_jitter
+from .dns_tools import (
+    DnsPreset,
+    DNS_PRESETS,
+    AdapterDns,
+    DnsOperationResult,
+    get_current_dns_servers,
+    get_active_adapter_dns,
+    set_dns_servers,
+    reset_dns_automatic,
+    flush_dns_cache,
+    register_dns,
+    clear_resolver_cache,
+)
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -89,6 +102,17 @@ __all__ = [
     "test_download",
     "test_upload",
     "test_ping_jitter",
+    "DnsPreset",
+    "DNS_PRESETS",
+    "AdapterDns",
+    "DnsOperationResult",
+    "get_current_dns_servers",
+    "get_active_adapter_dns",
+    "set_dns_servers",
+    "reset_dns_automatic",
+    "flush_dns_cache",
+    "register_dns",
+    "clear_resolver_cache",
     "LocalNetworkInfo",
     "AdapterInfo",
     "get_local_ip",

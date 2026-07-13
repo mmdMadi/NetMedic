@@ -181,7 +181,7 @@ def create_distribution():
     readme.write_text(
         f"NetMedic - Windows Network Diagnostics & Repair Toolkit\n"
         f"{'='*50}\n\n"
-        f"Version: 1.3.0\n"
+        f"Version: 1.4.0\n"
         f"License: MIT\n\n"
         f"Quick Start:\n"
         f"  1. Double-click {OUTPUT_NAME} to launch\n"

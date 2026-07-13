@@ -6,8 +6,9 @@
 > maintenance tools, and displays a live dashboard with internet health
 > scoring — **without ever removing hardware automatically**.
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/mmdMadi/NetMedic)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/mmdMadi/NetMedic)
 [![Python](https://img.shields.io/badge/python-3.12+-green.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-289%20passing-brightgreen.svg)](https://github.com/mmdMadi/NetMedic/actions)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/)
 
@@ -271,7 +272,7 @@ NetMedic/
 ├── theme.tcss              # NetMedic dark theme (TCSS)
 ├── netmedic.spec           # PyInstaller spec for building
 ├── build.py                # Build script for packaging
-├── __init__.py             # Package version (1.3.0)
+├── __init__.py             # Package version (1.4.0)
 │
 ├── ui/                     # Textual widgets and modal dialogs (13 screens)
 │   ├── dashboard.py        # System summary + info cards + health score
@@ -290,7 +291,7 @@ NetMedic/
 │   ├── health_score.py     # Health Score screen
 │   └── log_viewer.py       # Log Viewer screen
 │
-├── network/                # Network domain logic — UI-free (16 modules)
+├── network/                # Network domain logic — UI-free (18 modules)
 │   ├── powershell.py       # Wrapped, UTF-8, timeout-safe PowerShell runner
 │   ├── adapter.py          # Adapter dataclass + AdapterCategory enum
 │   ├── categorizer.py      # Pure categorization rules
@@ -406,6 +407,65 @@ No installation required — just copy and run.
 - Frozen dataclasses for thread-safe result passing.
 - `threading.Lock` for shared mutable state in concurrent code.
 - Input validation on all PowerShell-interpolated values.
+
+---
+
+## Testing
+
+```powershell
+# Run all tests
+python -m pytest tests/ -v
+
+# Run only non-network tests (fast, no PowerShell)
+python -m pytest tests/ -m "not network"
+
+# Run with coverage report
+python -m pytest tests/ --cov=network --cov=utils --cov=config --cov-report=term-missing
+```
+
+**289 tests** across 14 test files covering:
+
+| Module | Tests | Coverage |
+|--------|-------|----------|
+| `network/adapter.py` | 17 | Construction, properties, serialization |
+| `network/categorizer.py` | 18 | VPN, virtual, ghost, priority rules |
+| `network/scanner.py` | 9 | ScanStats, ScanResult, ScanError |
+| `network/diagnostics.py` | 10 | String normalization, enrich with mocks |
+| `network/diagnostics_internet.py` | 13 | Ping, traceroute, MTU, DNS, gateway |
+| `network/dns_tools.py` | 20 | Dataclasses, presets, validation |
+| `network/repair.py` | 12 | Steps, repair execution with mocks |
+| `network/export.py` | 12 | CSV, JSON, TXT export |
+| `network/health.py` | 17 | Scoring, grading, thresholds |
+| `network/health_service.py` | 4 | HealthReport dataclass |
+| `network/internet.py` | 12 | Status enum, check results |
+| `network/local_info.py` | 9 | Dataclasses, DNS provider matching |
+| `network/powershell.py` | 11 | PSResult, runner, JSON parsing |
+| `network/adapter_manager.py` | 10 | Dataclasses, validation |
+| `network/report_generator.py` | 8 | HTML escaping, text rendering |
+| `utils/helpers.py` | 25 | Formatting, string, color helpers |
+| `utils/admin.py` | 7 | ElevationInfo, is_admin |
+| `utils/storage.py` | 10 | Paths, JSON read/write |
+| `config.py` | 16 | Defaults, coercion, persistence |
+
+---
+
+## Contributing
+
+Contributions are welcome! Here's how:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/my-feature`)
+3. **Commit** your changes (`git commit -m "feat: add my feature"`)
+4. **Push** to the branch (`git push origin feature/my-feature`)
+5. **Open** a Pull Request
+
+### Guidelines
+
+- Follow the existing code style (PEP 8, type hints, docstrings)
+- Add tests for new functionality
+- Ensure all tests pass (`python -m pytest tests/`)
+- Update README if adding user-facing features
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
 
 ---
 

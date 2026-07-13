@@ -1,21 +1,22 @@
 /* ==========================================================================
-   NetMedic theme — "netmedic-dark" v2
+   NetMedic theme — "netmedic-dark" v3
    A professional dark theme tuned for long sessions in Windows Terminal.
 
-   Changes in v2:
-   - Rounded buttons with smooth hover transitions
-   - Improved DataTable with alternating row hints
-   - Better Input focus states
-   - Polished scrollbar styling
-   - Status bar color badges
+   Changes in v3:
+   - Added ModalScreen / VerticalScroll base styling
+   - Improved Header with subtitle contrast
+   - Better Label styling for dialogs
+   - Refined Tooltip with subtle border glow
+   - Consistent color palette across all components
+   - Improved Button disabled state
+   - Added LoadingIndicator styling
 
-   Notes
-   -----
-   Textual's TCSS is a subset of CSS. It does NOT support custom
-   properties (``:root { --x: ... }``) and color alpha must be expressed
-   as 8-digit hex (``#RRGGBBAA``), not as percentages. Use the built-in
-   design tokens (``$primary``, ``$success``, ...) and the auto-derived
-   variants (``$primary-darken-2``, ...) instead.
+   Color palette (Tailwind-inspired slate/blue):
+     Base:    #0b1016  Surface: #0f172a  Panel:   #1e293b
+     Border:  #334155  Muted:   #64748b  Text:    #d6dde6
+     Bright:  #e5edf6  Blue:    #3b82f6  Cyan:    #0e7490
+     Green:   #22c55e  Yellow:  #f59e0b  Red:     #ef4444
+     Purple:  #8b5cf6
    ========================================================================== */
 
 App {
@@ -32,7 +33,7 @@ Header {
 
 Footer {
     background: #111822;
-    color: #d6dde6;
+    color: #94a3b8;
     dock: bottom;
 }
 
@@ -106,9 +107,13 @@ Scrollbar > .scrollbar--button {
     background: #2b3d54;
 }
 
-/* ----- Static text helpers -------------------------------------------- */
+/* ----- Static / Label text -------------------------------------------- */
 Static {
     color: #d6dde6;
+}
+
+Label {
+    color: #94a3b8;
 }
 
 /* ----- Buttons -------------------------------------------------------- */
@@ -132,6 +137,12 @@ Button:focus {
 
 Button:active {
     background: #1a2840;
+}
+
+Button:disabled {
+    background: #111822;
+    color: #475569;
+    border: tall #1e293b;
 }
 
 /* Button variants */
@@ -179,7 +190,7 @@ Button.-error:hover {
 Tooltip {
     background: #1e293b;
     color: #e2e8f0;
-    border: round #334155;
+    border: round #475569;
     padding: 0 1;
 }
 
@@ -192,6 +203,20 @@ Select {
 
 Select:focus {
     border: round #7fb0ff;
+}
+
+/* ----- Modal screens -------------------------------------------------- */
+ModalScreen {
+    background: #0b1016ee;
+}
+
+VerticalScroll {
+    background: transparent;
+}
+
+/* ----- Loading indicator ---------------------------------------------- */
+LoadingIndicator {
+    color: #3b82f6;
 }
 
 /* ----- Selection highlight -------------------------------------------- */

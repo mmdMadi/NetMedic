@@ -147,6 +147,15 @@ Use the keyboard shortcuts below to drive it.
 | Key     | Action |
 |---------|--------|
 | `R`     | Scan adapters |
+| `T`     | Internet Diagnostics |
+| `S`     | Internet Speed Test |
+| `N`     | DNS Tools |
+| `U`     | Network Repair |
+| `A`     | Adapter Manager |
+| `P`     | Public Network Info |
+| `G`     | Diagnostic Report |
+| `H`     | Internet Health Score |
+| `L`     | Log Viewer |
 | `F`     | Open the filter dialog |
 | `Space` | Select / deselect the focused row |
 | `Ctrl+A`| Select all visible adapters |
@@ -171,6 +180,8 @@ NetMedic/
 ├── README.md               # this file
 ├── theme.tcss              # NetMedic dark theme (TCSS)
 ├── config.json             # user-editable runtime configuration
+├── netmedic.spec           # PyInstaller spec for building
+├── build.py                # Build script for packaging
 ├── ui/                     # Textual widgets and modal dialogs
 │   ├── __init__.py
 │   ├── dashboard.py        # System summary + info cards + health score
@@ -178,7 +189,16 @@ NetMedic/
 │   ├── details.py          # Per-adapter details panel
 │   ├── status.py           # Status bar + spinner
 │   ├── actions_bar.py      # Quick-action toolbar
-│   └── dialogs.py          # Confirm / Filter / Export / Error dialogs
+│   ├── dialogs.py          # Confirm / Filter / Export / Error dialogs
+│   ├── diagnostics.py      # Internet Diagnostics screen
+│   ├── speed_test.py       # Speed Test screen
+│   ├── dns_tools.py        # DNS Tools screen
+│   ├── repair.py           # Network Repair screen
+│   ├── adapter_manager.py  # Adapter Manager screen
+│   ├── public_info.py      # Public Network Info screen
+│   ├── report_generator.py # Diagnostic Report screen
+│   ├── health_score.py     # Health Score screen
+│   └── log_viewer.py       # Log Viewer screen
 ├── network/                # Network domain logic (UI-free)
 │   ├── __init__.py
 │   ├── powershell.py       # Wrapped, UTF-8, timeout-safe PowerShell runner
@@ -190,7 +210,14 @@ NetMedic/
 │   ├── internet.py         # Internet connectivity check
 │   ├── local_info.py       # Local IP, adapters, DNS (psutil-based)
 │   ├── public_info.py      # Public IP, ISP, geo lookup
-│   └── health.py           # Health score computation (0–100)
+│   ├── health.py           # Health score computation (0–100)
+│   ├── diagnostics_internet.py # Ping, traceroute, MTU, DNS tests
+│   ├── speed_test.py       # Download/upload speed test
+│   ├── dns_tools.py        # DNS management (change, flush, register)
+│   ├── repair.py           # Network repair sequence
+│   ├── adapter_manager.py  # Adapter enable/disable/restart
+│   ├── report_generator.py # Diagnostic report generation
+│   └── health_service.py   # Health score service
 ├── utils/                  # Cross-cutting helpers
 │   ├── __init__.py
 │   ├── admin.py            # Administrator / elevation detection

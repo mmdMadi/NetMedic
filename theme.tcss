@@ -135,10 +135,6 @@ Button:focus {
     border: tall #7fb0ff;
 }
 
-Button:active {
-    background: #1a2840;
-}
-
 Button:disabled {
     background: #111822;
     color: #475569;

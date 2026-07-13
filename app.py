@@ -67,6 +67,7 @@ from ui.adapter_manager import AdapterManagerScreen  # noqa: E402
 from ui.public_info import PublicInfoScreen  # noqa: E402
 from ui.report_generator import ReportGeneratorScreen  # noqa: E402
 from ui.health_score import HealthScoreScreen  # noqa: E402
+from ui.log_viewer import LogViewerScreen  # noqa: E402
 from ui.dialogs import (  # noqa: E402
     ConfirmDialog,
     ConfirmResult,
@@ -95,6 +96,7 @@ KEYBOARD_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("P", "Public Network Info"),
     ("G", "Diagnostic Report"),
     ("H", "Internet Health Score"),
+    ("L", "Log Viewer"),
     ("F", "Filter"),
     ("Space", "Select / deselect row"),
     ("Ctrl+A", "Select all (visible)"),
@@ -131,6 +133,7 @@ class NetMedicApp(App):
         Binding("p", "public_info", "Public Info"),
         Binding("g", "report", "Report"),
         Binding("h", "health_score", "Health"),
+        Binding("l", "log_viewer", "Logs"),
         Binding("f", "filter", "Filter"),
         Binding("e", "export", "Export"),
         Binding("i", "ignore", "Ignore"),
@@ -204,6 +207,7 @@ class NetMedicApp(App):
             "public-info": self.action_public_info,
             "report": self.action_report,
             "health": self.action_health_score,
+            "logs": self.action_log_viewer,
             "filter": self.action_filter,
             "export": self.action_export,
             "ignore": self.action_ignore,
@@ -253,6 +257,10 @@ class NetMedicApp(App):
     def action_health_score(self) -> None:
         """Open the Internet Health Score overlay."""
         self.push_screen(HealthScoreScreen())
+
+    def action_log_viewer(self) -> None:
+        """Open the Log Viewer overlay."""
+        self.push_screen(LogViewerScreen())
 
     def action_filter(self) -> None:
         """Open the filter dialog and apply the selection."""

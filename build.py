@@ -155,7 +155,7 @@ def verify_executable():
             cwd=str(DIST_DIR),
         )
         print(f"  Application launched (PID: {proc.pid})")
-        print("  ✓ Executable verified successfully")
+        print("  [OK] Executable verified successfully")
         return True
     except KeyboardInterrupt:
         print("\n  Verification cancelled by user")
@@ -245,7 +245,7 @@ def main():
     if args.verify:
         verify_executable()
 
-    print(f"\n✓ Build complete: {OUTPUT_PATH}")
+    print(f"\n[OK] Build complete: {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

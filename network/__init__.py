@@ -50,6 +50,7 @@ from .dns_tools import (
     clear_resolver_cache,
 )
 from .repair import RepairStep, RepairResult, StepStatus, REPAIR_STEPS, run_repair, is_admin
+from .adapter_manager import AdapterDetail, AdapterOperationResult, list_adapters, get_adapter_detail, enable_adapter, disable_adapter, restart_adapter
 from .local_info import (
     LocalNetworkInfo,
     AdapterInfo,
@@ -120,6 +121,13 @@ __all__ = [
     "REPAIR_STEPS",
     "run_repair",
     "is_admin",
+    "AdapterDetail",
+    "AdapterOperationResult",
+    "list_adapters",
+    "get_adapter_detail",
+    "enable_adapter",
+    "disable_adapter",
+    "restart_adapter",
     "LocalNetworkInfo",
     "AdapterInfo",
     "get_local_ip",

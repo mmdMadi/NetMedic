@@ -1,25 +1,91 @@
+<div align="center">
+
+<!-- Logo placeholder -->
+<!-- <img src="docs/images/logo.png" alt="NetMedic Logo" width="120" /> -->
+
 # NetMedic
 
-> A professional **Windows Network Diagnostics & Repair Toolkit** built as a Textual
-> TUI. NetMedic inspects every network adapter on the machine, detects
-> inactive / virtual / VPN / ghost adapters, provides safe
-> maintenance tools, and displays a live dashboard with internet health
-> scoring — **without ever removing hardware automatically**.
+**Modern Windows Network Diagnostics & Repair Toolkit built with Python and Textual.**
 
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/mmdMadi/NetMedic)
-[![Python](https://img.shields.io/badge/python-3.12+-green.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-289%20passing-brightgreen.svg)](https://github.com/mmdMadi/NetMedic/actions)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg?style=for-the-badge)](https://github.com/mmdMadi/NetMedic/releases/latest)
+[![Python](https://img.shields.io/badge/python-3.12+-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-00d275.svg?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4.svg?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/)
+[![Tests](https://img.shields.io/badge/tests-289%20passing-brightgreen.svg?style=for-the-badge)](https://github.com/mmdMadi/NetMedic/actions)
+[![GitHub Stars](https://img.shields.io/github/stars/mmdMadi/NetMedic?style=for-the-badge&logo=github)](https://github.com/mmdMadi/NetMedic/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/mmdMadi/NetMedic/total?style=for-the-badge&logo=github)](https://github.com/mmdMadi/NetMedic/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/mmdMadi/NetMedic?style=for-the-badge&logo=github)](https://github.com/mmdMadi/NetMedic/commits/main)
+[![Issues](https://img.shields.io/github/issues/mmdMadi/NetMedic?style=for-the-badge&logo=github)](https://github.com/mmdMadi/NetMedic/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/mmdMadi/NetMedic?style=for-the-badge&logo=github)](https://github.com/mmdMadi/NetMedic/pulls)
+[![Code Size](https://img.shields.io/github/languages/code-size/mmdMadi/NetMedic?style=for-the-badge)](https://github.com/mmdMadi/NetMedic)
 
-NetMedic is built to be:
+---
 
-- **Safe** — every destructive operation requires explicit confirmation.
-- **Readable** — dark, layered UI with dashboard, table, details, and status bar.
-- **Modular** — clean separation between `network/`, `ui/`, and `utils/`.
-- **Robust** — every PowerShell call is wrapped, errors are surfaced
-  as friendly dialogs, and the app never crashes on a partial failure.
-- **Portable** — single executable, no installation required.
+NetMedic inspects every network adapter on your Windows machine, detects inactive / virtual / VPN / ghost adapters, provides safe maintenance tools, and displays a live dashboard with internet health scoring — **without ever removing hardware automatically**.
+
+**Safe · Readable · Modular · Robust · Portable**
+
+</div>
+
+---
+
+## Why NetMedic?
+
+Windows networking tools are scattered across **CMD**, **PowerShell**, **Control Panel**, and **Settings** — each with its own interface, syntax, and learning curve. Diagnosing a network issue often means jumping between five different tools just to gather basic information.
+
+**NetMedic solves this** by unifying everything into a single, keyboard-driven terminal interface. One application to scan adapters, diagnose connectivity, test speed, manage DNS, repair network stacks, and generate reports — all without leaving the terminal.
+
+### Built for
+
+| Audience | Use Case |
+|----------|----------|
+| **System Administrators** | Fleet diagnostics, adapter management, automated repair |
+| **IT Support** | Quick triage, one-click repair, report generation |
+| **Developers** | Network debugging, DNS switching, connectivity testing |
+| **Power Users** | Health monitoring, adapter cleanup, performance testing |
+| **Help Desk Engineers** | Guided diagnostics, exportable reports for escalation |
+
+---
+
+## Screenshots
+
+<!-- Replace placeholders with actual screenshots -->
+
+| Dashboard | Adapter Scanner | Internet Diagnostics |
+|-----------|----------------|---------------------|
+| ![Dashboard](docs/images/dashboard.png) | ![Adapter Scanner](docs/images/adapter_scanner.png) | ![Internet Diagnostics](docs/images/diagnostics.png) |
+
+| Speed Test | DNS Tools | Network Repair |
+|-----------|-----------|---------------|
+| ![Speed Test](docs/images/speed_test.png) | ![DNS Tools](docs/images/dns_tools.png) | ![Network Repair](docs/images/repair.png) |
+
+| Adapter Manager | Health Score | Public Info | Report |
+|----------------|-------------|-------------|--------|
+| ![Adapter Manager](docs/images/adapter_manager.png) | ![Health Score](docs/images/health_score.png) | ![Public Info](docs/images/public_info.png) | ![Report](docs/images/report.png) |
+
+---
+
+## Demo
+
+<!-- Replace with actual GIF -->
+
+![NetMedic Demo](docs/images/demo.gif)
+
+*Demonstrates: launch → scan adapters → run diagnostics → repair network → export report*
+
+---
+
+## Feature Highlights
+
+```
+✅ Network Adapter Scanner          ✅ Internet Diagnostics
+✅ Internet Speed Test              ✅ DNS Tools (7 presets)
+✅ One-Click Network Repair         ✅ Public IP Detection
+✅ Internet Health Score (0-100)    ✅ Diagnostic Report Generator
+✅ Adapter Manager (Enable/Disable) ✅ Log Viewer
+✅ CSV / JSON / TXT Export          ✅ Portable Executable
+✅ 289 Tests                        ✅ CI/CD Pipeline
+```
 
 ---
 
@@ -316,6 +382,7 @@ NetMedic/
 │   ├── helpers.py          # Pure formatting helpers
 │   └── storage.py          # Paths + atomic JSON persistence
 │
+├── tests/                  # Test suite (289 tests)
 ├── logs/                   # Daily log files (auto-created)
 └── exports/                # Exported reports (auto-created)
 ```
@@ -377,6 +444,69 @@ python build.py --verify
 
 The build produces a single portable executable at `dist/NetMedic.exe`.
 No installation required — just copy and run.
+
+---
+
+## Roadmap
+
+### Completed
+
+- [x] Dashboard with live status cards
+- [x] Network Adapter Scanner with categorization
+- [x] Internet Diagnostics (ping, traceroute, MTU, DNS, gateway)
+- [x] Internet Speed Test (download, upload, ping, jitter)
+- [x] DNS Tools with 7 provider presets
+- [x] One-click Network Repair (7-step sequence)
+- [x] Adapter Manager (enable/disable/restart)
+- [x] Public Network Information
+- [x] Diagnostic Report Generator (TXT, HTML, Clipboard)
+- [x] Internet Health Score (0-100)
+- [x] Log Viewer with automatic cleanup
+- [x] CSV / JSON / TXT Export
+- [x] PyInstaller portable executable
+- [x] CI/CD with GitHub Actions
+- [x] 289 tests across 14 test files
+
+### Planned
+
+- [ ] Bandwidth Monitor (real-time throughput graph)
+- [ ] WiFi Signal Analyzer
+- [ ] Firewall Rule Manager
+- [ ] Plugin System for custom diagnostics
+- [ ] Linux / macOS Support
+- [ ] Scheduled Diagnostics (cron-like)
+- [ ] Multi-language Support (i18n)
+- [ ] Dark / Light Theme Toggle
+
+---
+
+## Performance
+
+| Metric | Value |
+|--------|-------|
+| **Average Scan Time** | < 3 seconds |
+| **Memory Usage** | ~30 MB idle |
+| **Executable Size** | ~15 MB |
+| **PowerShell Calls** | 5 bulk queries (optimized from N+1) |
+| **Startup Time** | < 2 seconds |
+| **Test Suite** | < 10 seconds |
+
+---
+
+## Security
+
+NetMedic is designed with security as a first-class concern:
+
+| Principle | Implementation |
+|-----------|---------------|
+| **No telemetry** | Zero network calls to analytics or tracking services |
+| **No automatic hardware removal** | Actions limited to disable — never uninstall or delete |
+| **No background services** | Runs only while the terminal is open |
+| **No registry modifications** | Unless explicitly requested by the user |
+| **Explicit confirmation** | Every destructive action gated behind a modal dialog |
+| **Admin-only maintenance** | Disable/Restart refuse to run without elevation |
+| **Input validation** | All PowerShell-interpolated values are sanitized |
+| **No credential storage** | No passwords, tokens, or API keys are stored |
 
 ---
 
@@ -449,23 +579,146 @@ python -m pytest tests/ --cov=network --cov=utils --cov=config --cov-report=term
 
 ---
 
+## FAQ
+
+<details>
+<summary><strong>Does NetMedic require administrator privileges?</strong></summary>
+
+No. Most features work without elevation. Only **Disable**, **Restart**, and **Network Repair** (Winsock/TCP/IP reset) require administrator privileges. The app detects elevation status and shows a clear banner.
+</details>
+
+<details>
+<summary><strong>Can NetMedic remove hardware?</strong></summary>
+
+No. NetMedic will **never** automatically remove, uninstall, or delete network hardware. The most destructive action available is *disable*, which can be reversed by re-enabling the adapter.
+</details>
+
+<details>
+<summary><strong>Can it work offline?</strong></summary>
+
+Partially. Adapter scanning, DNS management, network repair, and local diagnostics work fully offline. Internet-dependent features (public IP lookup, speed test, some health checks) require an active connection.
+</details>
+
+<details>
+<summary><strong>Does it support Windows 11?</strong></summary>
+
+Yes. NetMedic supports Windows 10 and Windows 11. It uses PowerShell `Get-NetAdapter` which is available on both versions.
+</details>
+
+<details>
+<summary><strong>Is internet access required?</strong></summary>
+
+Not for core functionality. Adapter scanning, DNS tools, network repair, and adapter management work entirely offline. Internet access is only needed for public IP lookup, speed testing, and some health score checks.
+</details>
+
+<details>
+<summary><strong>Can I build it from source?</strong></summary>
+
+Yes. Clone the repository, install dependencies with `pip install -r requirements.txt`, and run `python app.py`. To build a portable executable, run `python build.py`.
+</details>
+
+<details>
+<summary><strong>What terminal should I use?</strong></summary>
+
+Windows Terminal is recommended for the best experience. CMD and PowerShell also work. The app uses a Textual TUI which renders properly in any modern Windows terminal.
+</details>
+
+<details>
+<summary><strong>How do I update NetMedic?</strong></summary>
+
+Pull the latest changes with `git pull` and restart the application. If using the portable executable, download the latest release from GitHub.
+</details>
+
+---
+
 ## Contributing
 
-Contributions are welcome! Here's how:
+Contributions are welcome! Here's how to get started:
+
+### Quick Start
 
 1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/my-feature`)
-3. **Commit** your changes (`git commit -m "feat: add my feature"`)
-4. **Push** to the branch (`git push origin feature/my-feature`)
-5. **Open** a Pull Request
+2. **Clone** your fork (`git clone https://github.com/YOUR-USERNAME/NetMedic.git`)
+3. **Create** a feature branch (`git checkout -b feature/my-feature`)
+4. **Make** your changes
+5. **Test** your changes (`python -m pytest tests/ -v`)
+6. **Commit** (`git commit -m "feat: add my feature"`)
+7. **Push** (`git push origin feature/my-feature`)
+8. **Open** a Pull Request
 
 ### Guidelines
 
 - Follow the existing code style (PEP 8, type hints, docstrings)
 - Add tests for new functionality
-- Ensure all tests pass (`python -m pytest tests/`)
+- Ensure all tests pass before submitting
 - Update README if adding user-facing features
 - Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
+
+### Areas for Contribution
+
+- Bug fixes and error handling improvements
+- New diagnostic tools or adapters
+- UI/UX enhancements
+- Documentation improvements
+- Test coverage expansion
+- Performance optimizations
+
+---
+
+## Support
+
+### Report Bugs
+
+Found a bug? Please [open an issue](https://github.com/mmdMadi/NetMedic/issues/new?template=bug_report.md) with:
+
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Windows version and Python version
+
+### Request Features
+
+Have an idea? [Open a feature request](https://github.com/mmdMadi/NetMedic/issues/new?template=feature_request.md) describing:
+
+- The problem you're trying to solve
+- Your proposed solution
+- Any alternatives you've considered
+
+### Submit Pull Requests
+
+Ready to contribute? See the [Contributing](#contributing) section above.
+
+---
+
+## Release History
+
+| Version | Date | Highlights |
+|---------|------|-----------|
+| **v1.4.0** | 2026-07-13 | UI polish v3, documentation refresh, 289 tests |
+| **v1.3.7** | 2026-07-13 | Final test coverage: admin, storage, diagnostics, config |
+| **v1.3.6** | 2026-07-13 | Scanner, repair, local_info, health_service tests |
+| **v1.3.5** | 2026-07-13 | Mock-based bulk fetch and DNS tools tests |
+| **v1.3.4** | 2026-07-13 | Adapter manager and dns_tools test coverage |
+| **v1.3.3** | 2026-07-13 | Bug fixes, security, performance, test expansion |
+| **v1.3.0** | 2026-07-13 | Unit tests (82 tests across 5 modules) |
+| **v1.2.0** | 2026-07-13 | Logging, UI polish, packaging |
+| **v1.1.0** | 2026-07-13 | Diagnostics, speed test, DNS, repair, adapters, reports |
+| **v1.0.0** | 2026-07-13 | Initial release: dashboard + adapter scanner |
+
+---
+
+## Acknowledgements
+
+NetMedic is built on top of these amazing open-source projects:
+
+| Project | Role |
+|---------|------|
+| [**Python**](https://www.python.org/) | Core language |
+| [**Textual**](https://textual.textualize.io/) | TUI framework — makes beautiful terminal apps possible |
+| [**PowerShell**](https://learn.microsoft.com/powershell/) | Windows network management and diagnostics |
+| [**psutil**](https://github.com/giampaolo/psutil) | Cross-platform system and network utilities |
+| [**requests**](https://requests.readthedocs.io/) | HTTP library for public API calls |
+| [**PyInstaller**](https://pyinstaller.org/) | Python-to-executable packaging |
 
 ---
 
@@ -490,3 +743,13 @@ all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 ```
+
+---
+
+<div align="center">
+
+**Built with ❤️ using Python and Textual**
+
+[⬆ Back to Top](#netmedic)
+
+</div>

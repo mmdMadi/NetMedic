@@ -10,12 +10,11 @@ Accessed via the **H** key binding or the *Health* button in the actions bar.
 
 from __future__ import annotations
 
-import threading
-
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Static
+from textual import work
 
 from network.health_service import HealthReport, compute_health_report
 from utils.helpers import score_color
@@ -188,35 +187,25 @@ class HealthScoreScreen(ModalScreen[None]):
     # ------------------------------------------------------------------ #
     # Health computation
     # ------------------------------------------------------------------ #
+    @work(thread=True, exclusive=True, group="health")
     def _compute_health(self) -> None:
-        """Compute health score in a background thread."""
+        """Compute health score in a background worker."""
         self._refresh_btn.disabled = True
-        self._status.update("Computing health score…")
-
-        def _worker() -> None:
-            try:
-                report = compute_health_report()
-            except Exception as exc:
-                from network.health import HealthScore
-                report = HealthReport(
-                    score=HealthScore(score=0, max_score=100),
-                    warnings=[str(exc)],
-                )
-            self.call_from_thread(self._show_report, report)
-
-        t = threading.Thread(target=_worker, daemon=True)
-        t.start()
-        # Timeout safety — if thread hangs, show partial result after 30s
-        self.set_timer(30, self._timeout_check)
-
-    def _timeout_check(self) -> None:
-        """Show a timeout message if the health computation is still running."""
-        if self._refresh_btn.disabled:
-            self._refresh_btn.disabled = False
-            self._status.update("[yellow]Health check timed out — showing cached data[/]")
+        self._status.update("Computing health score...")
+        try:
+            report = compute_health_report()
+        except Exception as exc:
+            from network.health import HealthScore
+            report = HealthReport(
+                score=HealthScore(score=0, max_score=100),
+                warnings=[str(exc)],
+            )
+        self._show_report(report)
 
     def _show_report(self, report: HealthReport) -> None:
         """Render the health report."""
+        if not self.is_mounted:
+            return
         self._report = report
         self._refresh_btn.disabled = False
 

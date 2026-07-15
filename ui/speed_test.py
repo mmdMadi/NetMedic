@@ -11,13 +11,11 @@ the actions bar.
 
 from __future__ import annotations
 
-import threading
-
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.reactive import reactive
 from textual.screen import ModalScreen
 from textual.widgets import Button, ProgressBar, Static
+from textual import work
 
 from network.speed_test import (
     SpeedTestResult,
@@ -116,8 +114,7 @@ class SpeedTestScreen(ModalScreen[None]):
 
     def __init__(self) -> None:
         super().__init__()
-        self._cancel_event = threading.Event()
-        self._test_thread: threading.Thread | None = None
+        self._cancel_requested = False
 
         # Widgets (set in compose)
         self._title: Static
@@ -201,45 +198,40 @@ class SpeedTestScreen(ModalScreen[None]):
     # Test control
     # ------------------------------------------------------------------ #
     def _start_test(self) -> None:
-        """Begin the speed test in a background thread."""
-        self._cancel_event.clear()
+        """Begin the speed test in a background worker."""
+        self._cancel_requested = False
         self._start_btn.disabled = True
-        self._start_btn.label = "Running…"
+        self._start_btn.label = "Running..."
         self._progress_bar.progress = 0
         self._progress_bar.visible = True
         self._progress_label.visible = True
 
         # Reset results
-        self._ping_value.update("Measuring…")
-        self._jitter_value.update("Jitter: —")
-        self._download_value.update("—")
+        self._ping_value.update("Measuring...")
+        self._jitter_value.update("Jitter: --")
+        self._download_value.update("--")
         self._download_detail.update("")
-        self._upload_value.update("—")
+        self._upload_value.update("--")
         self._upload_detail.update("")
 
-        self._test_thread = threading.Thread(
-            target=self._run_test, daemon=True,
-        )
-        self._test_thread.start()
+        self._run_speed_test()
 
-    def _run_test(self) -> None:
-        """Execute the speed test (runs on background thread)."""
+    @work(thread=True, exclusive=True, group="speed_test")
+    def _run_speed_test(self) -> None:
+        """Execute the speed test (runs on background worker)."""
         try:
             result = run_speed_test(
                 download_mb=10,
                 upload_mb=10,
-                cancel_event=self._cancel_event,
                 progress=self._on_progress,
             )
-            self.call_from_thread(self._show_results, result)
+            self._show_results(result)
         except Exception as exc:
-            self.call_from_thread(self._show_error, str(exc))
+            self._show_error(str(exc))
 
     def _cancel_and_close(self) -> None:
         """Cancel any running test and dismiss the screen."""
-        self._cancel_event.set()
-        if self._test_thread and self._test_thread.is_alive():
-            self._test_thread.join(timeout=3)
+        self._cancel_requested = True
         self.dismiss()
 
     # ------------------------------------------------------------------ #
@@ -247,36 +239,37 @@ class SpeedTestScreen(ModalScreen[None]):
     # ------------------------------------------------------------------ #
     def _on_progress(self, phase: str, current: int, total: int) -> None:
         """Update progress bar from the speed test worker thread."""
-        if self._cancel_event.is_set():
+        if self._cancel_requested or not self.is_mounted:
             return
-
-        def _update() -> None:
+        try:
             if phase == "ping":
-                self._status.update("Measuring ping latency…")
-                self._progress_label.update("Ping: sending ICMP packets…")
+                self._status.update("Measuring ping latency...")
+                self._progress_label.update("Ping: sending ICMP packets...")
                 self._progress_bar.progress = 0
             elif phase == "download":
-                self._status.update("Testing download speed…")
+                self._status.update("Testing download speed...")
                 self._progress_label.update(f"Download: {current // (1024*1024)} MB / {total // (1024*1024)} MB")
                 if total > 0:
                     self._progress_bar.progress = min(100, int(current / total * 100))
             elif phase == "upload_prepare":
-                self._status.update("Preparing upload data…")
-                self._progress_label.update("Upload: generating payload…")
+                self._status.update("Preparing upload data...")
+                self._progress_label.update("Upload: generating payload...")
                 self._progress_bar.progress = 0
             elif phase == "upload":
-                self._status.update("Testing upload speed…")
+                self._status.update("Testing upload speed...")
                 self._progress_label.update(f"Upload: {current // (1024*1024)} MB / {total // (1024*1024)} MB")
                 if total > 0:
                     self._progress_bar.progress = min(100, int(current / total * 100))
-
-        self.call_from_thread(_update)
+        except Exception:
+            pass  # Screen may have been dismissed
 
     # ------------------------------------------------------------------ #
     # Results display
     # ------------------------------------------------------------------ #
     def _show_results(self, result: SpeedTestResult) -> None:
         """Render the final speed test results."""
+        if not self.is_mounted:
+            return
         self._start_btn.disabled = False
         self._start_btn.label = "Start Again"
         self._progress_bar.progress = 100
@@ -323,6 +316,8 @@ class SpeedTestScreen(ModalScreen[None]):
 
     def _show_error(self, message: str) -> None:
         """Display an error message."""
+        if not self.is_mounted:
+            return
         self._status.update(f"[red]Error: {message}[/]")
         self._start_btn.disabled = False
         self._start_btn.label = "Retry"

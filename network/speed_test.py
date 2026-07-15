@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import os
 import random
-import statistics
+import socket
 import threading
 import time
 from dataclasses import dataclass, field
@@ -57,15 +57,18 @@ PING_TIMEOUT: int = 2
 #: Overall speed test timeout (seconds).
 OVERALL_TIMEOUT: int = 120
 
-#: Download test endpoint — a 10 MB file served by Cloudflare.
-#: Falls back to Tele2 if Cloudflare is unreachable.
-DOWNLOAD_URLS: list[str] = [
-    "http://speedtest.tele2.net/10MB.zip",
-    "http://speedtest.tele2.net/1MB.zip",
-]
+#: Download test endpoints — reliable HTTPS CDN files.
+#: Cloudflare supports size-parameterized downloads for precise control.
+#: OVH serves fixed-size files as fallback.
+_DOWNLOAD_CLOUDFLARE: str = "https://speed.cloudflare.com/__down?bytes={bytes}"
+_DOWNLOAD_OVH_SIZES: dict[int, str] = {
+    1: "https://proof.ovh.net/files/1Mb.dat",
+    10: "https://proof.ovh.net/files/10Mb.dat",
+}
+_DOWNLOAD_OVH_DEFAULT: str = "https://proof.ovh.net/files/1Mb.dat"
 
-#: Upload test endpoint — HTTPBin echo service (accepts any POST body).
-UPLOAD_URL: str = "https://httpbin.org/post"
+#: Upload test endpoint — Postman echo service (accepts any POST body).
+UPLOAD_URL: str = "https://postman-echo.com/post"
 
 #: Progress callback signature: ``(phase, current_bytes, total_bytes) -> None``
 ProgressCallback = Callable[[str, int, int], None]
@@ -140,8 +143,16 @@ def test_download(
     tuple[float, int, float, str]
         ``(speed_mbps, bytes_downloaded, duration_seconds, server_url)``
     """
-    urls = [url] if url else DOWNLOAD_URLS
     total_bytes = size_mb * 1024 * 1024
+
+    if url:
+        urls = [url]
+    else:
+        # Build size-appropriate URLs: Cloudflare first (exact size), OVH fallback
+        urls = [
+            _DOWNLOAD_CLOUDFLARE.format(bytes=total_bytes),
+            _DOWNLOAD_OVH_SIZES.get(size_mb, _DOWNLOAD_OVH_DEFAULT),
+        ]
 
     for test_url in urls:
         if cancel_event and cancel_event.is_set():
@@ -283,14 +294,15 @@ def test_ping_jitter(
     except Exception:
         pass
 
-    # TCP fallback — measure HTTP round-trip time
+    # TCP fallback — measure round-trip via raw socket connect
     times: list[float] = []
+    port = 443
     for _ in range(min(count, 5)):
         try:
             start = time.perf_counter()
-            requests.get(f"https://{host}", timeout=timeout, allow_redirects=False)
-            elapsed = (time.perf_counter() - start) * 1000
-            times.append(elapsed)
+            with socket.create_connection((host, port), timeout=timeout):
+                elapsed = (time.perf_counter() - start) * 1000
+                times.append(elapsed)
         except Exception:
             pass
 

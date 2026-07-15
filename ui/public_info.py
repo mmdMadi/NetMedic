@@ -10,12 +10,11 @@ Accessed via the **P** key binding or the *Public Info* button in the actions ba
 
 from __future__ import annotations
 
-import threading
-
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Static
+from textual import work
 
 from network.public_info import PublicNetworkInfo, gather
 
@@ -163,27 +162,19 @@ class PublicInfoScreen(ModalScreen[None]):
     # ------------------------------------------------------------------ #
     # Data fetching
     # ------------------------------------------------------------------ #
+    @work(thread=True, exclusive=True, group="public_info")
     def _fetch_info(self) -> None:
-        """Fetch all public info in a background thread."""
-        def _worker() -> None:
-            try:
-                info = gather()
-            except Exception as exc:
-                info = PublicNetworkInfo(error=str(exc))
-            self.call_from_thread(self._show_info, info)
-
-        t = threading.Thread(target=_worker, daemon=True)
-        t.start()
-        # Timeout safety — show error after 15s
-        self.set_timer(15, self._timeout_check)
-
-    def _timeout_check(self) -> None:
-        """Show a timeout message if fetching is still in progress."""
-        if self._status.renderable == "Loading…":
-            self._status.update("[yellow]Request timed out — check your internet connection[/]")
+        """Fetch all public info in a background worker."""
+        try:
+            info = gather()
+        except Exception as exc:
+            info = PublicNetworkInfo(error=str(exc))
+        self._show_info(info)
 
     def _show_info(self, info: PublicNetworkInfo) -> None:
         """Render the fetched information."""
+        if not self.is_mounted:
+            return
         if info.error:
             self._status.update(f"[red]Error: {info.error}[/]")
             return

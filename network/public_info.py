@@ -9,7 +9,7 @@ APIs used (no API key needed):
 
 - ``https://api.ipify.org?format=json`` — public IPv4
 - ``https://api64.ipify.org?format=json`` — public IPv4/IPv6
-- ``https://ipapi.co/json/`` — ISP, city, country, ASN (free tier)
+- ``https://ipwho.is/`` — ISP, city, country, ASN, geolocation (free, no key)
 
 Each function degrades gracefully: on network failure it returns a
 sentinel string rather than raising.
@@ -76,13 +76,13 @@ def get_public_ipv6() -> str:
 
 
 def get_isp_info() -> dict[str, str]:
-    """Return ISP / geo metadata from ``ipapi.co``.
+    """Return ISP / geo metadata from ``ipwho.is``.
 
     Returns a flat dict with keys: ``isp``, ``city``, ``country``,
     ``region``, ``asn``, ``timezone``. Missing fields default to
     ``"—"``.
     """
-    data = _safe_get("https://ipapi.co/json/")
+    data = _safe_get("https://ipwho.is/")
     if not data:
         return {
             "isp": "—",
@@ -92,13 +92,15 @@ def get_isp_info() -> dict[str, str]:
             "asn": "—",
             "timezone": "—",
         }
+    conn = data.get("connection") or {}
+    tz = data.get("timezone") or {}
     return {
-        "isp": str(data.get("org") or "—"),
+        "isp": str(conn.get("isp") or data.get("org") or "—"),
         "city": str(data.get("city") or "—"),
-        "country": str(data.get("country_name") or "—"),
+        "country": str(data.get("country") or "—"),
         "region": str(data.get("region") or "—"),
-        "asn": str(data.get("asn") or "—"),
-        "timezone": str(data.get("timezone") or "—"),
+        "asn": str(conn.get("asn") or "—"),
+        "timezone": str(tz.get("id") or data.get("timezone_id") or "—"),
     }
 
 

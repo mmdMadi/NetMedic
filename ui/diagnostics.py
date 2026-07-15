@@ -12,6 +12,7 @@ the actions bar.
 
 from __future__ import annotations
 
+from textual import work
 from textual.app import ComposeResult
 from textual.containers import Vertical, VerticalScroll
 from textual.screen import ModalScreen
@@ -172,13 +173,21 @@ class DiagnosticsScreen(ModalScreen[None]):
         self.run_worker(self._run_dns, thread=True)
         self.run_worker(self._run_gateway, thread=True)
 
+    def _safe_update(self, func, *args) -> None:
+        """Safely call a UI update function, handling dismissed screens."""
+        try:
+            if self.is_mounted:
+                func(*args)
+        except Exception:
+            pass
+
     def _run_ping(self) -> None:
         """Ping 8.8.8.8 with 4 packets."""
         try:
             result = ping_host("8.8.8.8", count=4, timeout=2)
         except Exception as exc:
             result = PingResult(host="8.8.8.8", reachable=False, error=str(exc))
-        self.call_from_thread(self._render_ping, result)
+        self._safe_update(self._render_ping, result)
 
     def _run_multi_ping(self) -> None:
         """Ping multiple public DNS servers concurrently."""
@@ -186,7 +195,7 @@ class DiagnosticsScreen(ModalScreen[None]):
             result = ping_multi_host(self.DEFAULT_PING_HOSTS, count=4, timeout=2)
         except Exception as exc:
             result = MultiPingResult(results=[], errors=[str(exc)])
-        self.call_from_thread(self._render_multi_ping, result)
+        self._safe_update(self._render_multi_ping, result)
 
     def _run_packet_loss(self) -> None:
         """20-packet loss test to 8.8.8.8."""
@@ -194,7 +203,7 @@ class DiagnosticsScreen(ModalScreen[None]):
             result = measure_packet_loss("8.8.8.8", count=20, timeout=2)
         except Exception as exc:
             result = PingResult(host="8.8.8.8", reachable=False, error=str(exc))
-        self.call_from_thread(self._render_packet_loss, result)
+        self._safe_update(self._render_packet_loss, result)
 
     def _run_traceroute(self) -> None:
         """Traceroute to 8.8.8.8."""
@@ -202,7 +211,7 @@ class DiagnosticsScreen(ModalScreen[None]):
             result = trace_route("8.8.8.8", max_hops=20, timeout=3000)
         except Exception as exc:
             result = TracerouteResult(host="8.8.8.8", hops=[], error=str(exc))
-        self.call_from_thread(self._render_traceroute, result)
+        self._safe_update(self._render_traceroute, result)
 
     def _run_mtu(self) -> None:
         """Binary-search MTU detection via 8.8.8.8."""
@@ -210,7 +219,7 @@ class DiagnosticsScreen(ModalScreen[None]):
             result = detect_mtu("8.8.8.8")
         except Exception as exc:
             result = MtuResult(mtu=0, method="Failed", error=str(exc))
-        self.call_from_thread(self._render_mtu, result)
+        self._safe_update(self._render_mtu, result)
 
     def _run_dns(self) -> None:
         """Parallel DNS resolution test across 4 public servers."""
@@ -219,15 +228,15 @@ class DiagnosticsScreen(ModalScreen[None]):
         except Exception as exc:
             _log.warning("DNS test failed: %s", exc)
             result = DnsTestResult(results=[])
-        self.call_from_thread(self._render_dns, result)
+        self._safe_update(self._render_dns, result)
 
     def _run_gateway(self) -> None:
         """Default gateway detection + latency probe."""
         try:
             result = detect_gateway()
         except Exception as exc:
-            result = GatewayResult(gateway="—", interface="—", error=str(exc))
-        self.call_from_thread(self._render_gateway, result)
+            result = GatewayResult(gateway="\u2014", interface="\u2014", error=str(exc))
+        self._safe_update(self._render_gateway, result)
 
     # ------------------------------------------------------------------ #
     # Renderers — run on the UI thread via call_from_thread

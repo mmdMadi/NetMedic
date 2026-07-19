@@ -190,8 +190,8 @@ class HealthScoreScreen(ModalScreen[None]):
     @work(thread=True, exclusive=True, group="health")
     def _compute_health(self) -> None:
         """Compute health score in a background worker."""
-        self._refresh_btn.disabled = True
-        self._status.update("Computing health score...")
+        self.app.call_from_thread(self._refresh_btn.__setattr__, "disabled", True)
+        self.app.call_from_thread(self._status.update, "Computing health score...")
         try:
             report = compute_health_report()
         except Exception as exc:
@@ -200,7 +200,7 @@ class HealthScoreScreen(ModalScreen[None]):
                 score=HealthScore(score=0, max_score=100),
                 warnings=[str(exc)],
             )
-        self._show_report(report)
+        self.app.call_from_thread(self._show_report, report)
 
     def _show_report(self, report: HealthReport) -> None:
         """Render the health report."""

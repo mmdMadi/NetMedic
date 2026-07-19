@@ -46,7 +46,7 @@ from network.adapter import Adapter  # noqa: E402
 from network.diagnostics import Diagnostics  # noqa: E402
 from network.export import ExportFormat, Exporter  # noqa: E402
 from network.health import compute_health  # noqa: E402
-from network.internet import check_internet_with_latency  # noqa: E402
+from network.internet import InternetStatus, check_internet_with_latency  # noqa: E402
 from network.local_info import (  # noqa: E402
     get_default_gateway,
     get_local_ip,
@@ -160,6 +160,7 @@ class NetMedicApp(App):
         self._scanner = AdapterScanner(self._config)
         self._diagnostics = Diagnostics(timeout=max(10, self._config.scan_timeout))
         self._last_result: Optional[ScanResult] = None
+        self._internet_status: InternetStatus = InternetStatus.CHECK_FAILED
 
     # ------------------------------------------------------------------ #
     # Compose
@@ -416,9 +417,9 @@ class NetMedicApp(App):
             latency = result.latency_ms
         except Exception as exc:  # noqa: BLE001
             _log.warning("Internet check failed: %s", exc)
-            from network.internet import InternetStatus
             status = InternetStatus.CHECK_FAILED
             latency = None
+        self._internet_status = status
         self.call_from_thread(
             self.query_one(Dashboard).update_internet_status, status, latency
         )
@@ -486,30 +487,18 @@ class NetMedicApp(App):
     def _recompute_health(self) -> None:
         """Recompute health score from the latest available signals.
 
-        Called after any individual check completes. Reads the current
-        dashboard card values to build the score. Runs on a background
-        thread.
+        Called after any individual check completes. Uses the stored
+        internet status and live system queries for gateway/adapter.
+        Runs on a background thread.
         """
         try:
             dashboard = self.query_one(Dashboard)
-
-            # Read current card values for the health computation.
-            from network.internet import InternetStatus
-            internet_status = InternetStatus.CHECK_FAILED
-            try:
-                status_text = dashboard._card_status._value
-                for member in InternetStatus:
-                    if member.value in status_text:
-                        internet_status = member
-                        break
-            except Exception:
-                pass
 
             gateway = get_default_gateway()
             adapter_connected = get_connected_adapter() != "—"
 
             score = compute_health(
-                internet_status=internet_status,
+                internet_status=self._internet_status,
                 gateway=gateway,
                 adapter_connected=adapter_connected,
             )

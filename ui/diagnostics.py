@@ -174,10 +174,9 @@ class DiagnosticsScreen(ModalScreen[None]):
         self.run_worker(self._run_gateway, thread=True)
 
     def _safe_update(self, func, *args) -> None:
-        """Safely call a UI update function, handling dismissed screens."""
+        """Safely call a UI update function via call_from_thread."""
         try:
-            if self.is_mounted:
-                func(*args)
+            self.app.call_from_thread(func, *args)
         except Exception:
             pass
 

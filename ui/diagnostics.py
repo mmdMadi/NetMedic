@@ -28,11 +28,11 @@ from network.diagnostics_internet import (
     detect_gateway,
     detect_mtu,
     measure_packet_loss,
+    ping_host,
     ping_multi_host,
     test_dns_resolution,
     trace_route,
 )
-from utils.helpers import safe_str
 from utils.logger import get_logger
 
 _log = get_logger(__name__)
